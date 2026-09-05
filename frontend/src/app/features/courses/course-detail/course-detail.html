@@ -1,0 +1,88 @@
+<div class="course-detail-container">
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+    <button mat-flat-button (click)="goBack()">Voltar</button>
+  } @else if (course()) {
+    <div class="course-header">
+      <button mat-icon-button (click)="goBack()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>{{ course()!.title }}</h1>
+    </div>
+
+    <mat-card class="course-card">
+      <mat-card-content>
+        <div class="course-info">
+          <div class="info-item">
+            <strong>Categoria:</strong>
+            <span>{{ course()!.category }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Autor:</strong>
+            <span>{{ course()!.authorId }}</span>
+          </div>
+          <div class="info-item">
+            <strong>Descrição:</strong>
+            <p>{{ course()!.description }}</p>
+          </div>
+          <div class="info-item">
+            <strong>Data de Criação:</strong>
+            <span>{{ course()!.createdAt | date: 'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" [routerLink]="['/courses', course()!.id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            Editar Curso
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="lessons-section">
+      <div class="lessons-header">
+        <h2>Aulas ({{ lessons().length }})</h2>
+        <button mat-raised-button color="accent" [routerLink]="['/courses', course()!.id, 'lessons', 'new']">
+          <mat-icon>add</mat-icon>
+          Adicionar Aula
+        </button>
+      </div>
+
+      @if (lessons().length === 0) {
+        <p class="no-lessons">Nenhuma aula cadastrada. Comece adicionando uma!</p>
+      } @else {
+        <div class="lessons-list">
+          @for (lesson of lessons(); track lesson.id) {
+            <mat-card class="lesson-card">
+              <mat-card-content>
+                <div class="lesson-info">
+                  <div class="lesson-number">{{ lesson.order + 1 }}</div>
+                  <div class="lesson-details">
+                    <h3>{{ lesson.title }}</h3>
+                    <p>{{ lesson.description }}</p>
+                    <a [href]="'https://youtu.be/' + lesson.videoId" target="_blank" class="video-link">
+                      Ver vídeo no YouTube →
+                    </a>
+                  </div>
+                  <div class="lesson-actions">
+                    <button mat-icon-button [routerLink]="['/courses', course()!.id, 'lessons', lesson.id, 'edit']" matTooltip="Editar">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="deleteLesson(lesson.id)" matTooltip="Deletar">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

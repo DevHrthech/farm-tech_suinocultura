@@ -1,0 +1,33 @@
+<div class="container">
+  <h1>Cursos - LMS Suinocultura</h1>
+
+  <button (click)="loadCourses()" class="btn-reload">↻ Recarregar</button>
+
+  <div *ngIf="loading" class="loading">
+    Carregando cursos...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && courses.length === 0 && !error" class="empty">
+    Nenhum curso encontrado
+  </div>
+
+  <div *ngIf="!loading && courses.length > 0" class="courses-grid">
+    <div *ngFor="let course of courses" class="course-card">
+      <h2>{{ course.title }}</h2>
+      <p class="category">📚 {{ course.category }}</p>
+      <p class="description">{{ course.description }}</p>
+      <div class="course-info">
+        <small>Autor: {{ course.authorId }}</small>
+        <small>ID: {{ course.id }}</small>
+      </div>
+      <div class="course-actions">
+        <button class="btn-edit">✏️ Editar</button>
+        <button class="btn-delete" (click)="deleteCourse(course.id)">🗑️ Deletar</button>
+      </div>
+    </div>
+  </div>
+</div>

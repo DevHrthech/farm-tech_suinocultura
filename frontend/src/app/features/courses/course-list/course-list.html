@@ -1,0 +1,53 @@
+<div class="course-list-container">
+  <h1>Cursos</h1>
+  <button mat-flat-button color="primary" routerLink="/courses/new">+ Novo Curso</button>
+
+  @if (loading()) {
+    <mat-spinner></mat-spinner>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (!loading() && !error()) {
+    <div class="course-grid">
+      @for (course of courses(); track course.id) {
+        <mat-card class="course-card">
+          <mat-card-header>
+            <mat-card-title>{{ course.title }}</mat-card-title>
+            <mat-card-subtitle>{{ course.category }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ course.description }}</p>
+
+            @if (course.videos && course.videos.length > 0) {
+              <div class="videos-section">
+                <h4>Vídeos</h4>
+                <div class="videos-grid">
+                  @for (video of course.videos; track video.id) {
+                    <a [href]="'https://www.youtube.com/watch?v=' + video.youtubeVideoId"
+                       target="_blank"
+                       rel="noopener"
+                       class="video-thumbnail"
+                       [title]="video.title">
+                      <img [src]="'https://img.youtube.com/vi/' + video.youtubeVideoId + '/hqdefault.jpg'"
+                           [alt]="video.title"
+                           class="thumbnail-img">
+                      <div class="play-overlay">
+                        <span class="play-icon">▶</span>
+                      </div>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-button color="primary" [routerLink]="['/courses', course.id]">Ver Detalhes</button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

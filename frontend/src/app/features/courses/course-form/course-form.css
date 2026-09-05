@@ -1,0 +1,21 @@
+.course-form-container {
+  max-width: 600px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.error {
+  color: red;
+}

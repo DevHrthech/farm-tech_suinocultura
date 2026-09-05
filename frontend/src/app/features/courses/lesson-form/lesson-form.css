@@ -1,0 +1,89 @@
+.lesson-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.back-button {
+  flex-shrink: 0;
+}
+
+.form-header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.video-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.video-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.thumbnail {
+  width: 200px;
+  height: auto;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.thumbnail:hover {
+  opacity: 0.8;
+}
+
+.preview-hint {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.loading {
+  text-align: center;
+  padding: 32px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.error {
+  color: #d32f2f;
+  padding: 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}

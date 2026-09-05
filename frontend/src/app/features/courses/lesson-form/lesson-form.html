@@ -1,0 +1,66 @@
+<div class="lesson-form-container">
+  <div class="form-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>{{ isEdit() ? 'Editar Aula' : 'Nova Aula' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <p class="loading">Carregando...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Título da Aula</mat-label>
+        <input matInput formControlName="title" placeholder="Ex: Importância da higiene na maternidade">
+        @if (form.get('title')?.invalid && form.get('title')?.touched) {
+          <mat-error>Título é obrigatório (mín. 3 caracteres)</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descrição</mat-label>
+        <textarea matInput formControlName="description" rows="4" placeholder="Descreva o conteúdo da aula"></textarea>
+        @if (form.get('description')?.invalid && form.get('description')?.touched) {
+          <mat-error>Descrição é obrigatória (mín. 10 caracteres)</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="video-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ID do Vídeo YouTube</mat-label>
+          <input matInput formControlName="videoId" (change)="onVideoIdChange()" placeholder="Ex: dQw4w9WgXcQ" [matTooltip]="'Copie o ID do URL: youtube.com/watch?v=AQUI_EH_O_ID'">
+          @if (form.get('videoId')?.invalid && form.get('videoId')?.touched) {
+            <mat-error>ID inválido. Deve ter exatamente 11 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        @if (videoPreview()) {
+          <div class="video-preview">
+            <img [src]="videoPreview()" alt="Preview do vídeo" (click)="onVideoIdChange()" class="thumbnail">
+            <p class="preview-hint">Clique na thumbnail para atualizar preview</p>
+          </div>
+        }
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Ordem (Sequência)</mat-label>
+        <input matInput type="number" formControlName="order" placeholder="0, 1, 2...">
+        @if (form.get('order')?.invalid && form.get('order')?.touched) {
+          <mat-error>Ordem é obrigatória</mat-error>
+        }
+      </mat-form-field>
+
+      @if (submitError) {
+        <p class="error">{{ submitError }}</p>
+      }
+
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="goBack()">Cancelar</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting">
+          {{ submitting ? 'Salvando...' : (isEdit() ? 'Atualizar Aula' : 'Criar Aula') }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

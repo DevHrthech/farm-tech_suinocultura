@@ -1,0 +1,56 @@
+<div class="course-form-container">
+  <h1>{{ isEdit() ? 'Editar Curso' : 'Novo Curso' }}</h1>
+
+  @if (loading()) {
+    <p class="loading">Carregando...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Título</mat-label>
+      <input matInput formControlName="title" placeholder="Ex: Manejo na Maternidade">
+      @if (form.get('title')?.invalid && form.get('title')?.touched) {
+        <mat-error>Título é obrigatório (mín. 3 caracteres)</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descrição</mat-label>
+      <textarea matInput formControlName="description" rows="4" placeholder="Descreva o conteúdo do curso"></textarea>
+      @if (form.get('description')?.invalid && form.get('description')?.touched) {
+        <mat-error>Descrição é obrigatória (mín. 10 caracteres)</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Categoria</mat-label>
+      <mat-select formControlName="category">
+        @for (cat of categories; track cat) {
+          <mat-option [value]="cat">{{ cat }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('category')?.invalid && form.get('category')?.touched) {
+        <mat-error>Selecione uma categoria</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Autor (ID)</mat-label>
+      <input matInput formControlName="authorId" placeholder="Ex: user-1">
+      @if (form.get('authorId')?.invalid && form.get('authorId')?.touched) {
+        <mat-error>Autor é obrigatório</mat-error>
+      }
+    </mat-form-field>
+
+    @if (submitError) {
+      <p class="error">{{ submitError }}</p>
+    }
+
+    <div class="actions">
+      <button mat-stroked-button type="button" routerLink="/courses">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="submitting">
+        {{ submitting ? 'Salvando...' : (isEdit() ? 'Atualizar Curso' : 'Criar Curso') }}
+      </button>
+    </div>
+    </form>
+  }
+</div>
