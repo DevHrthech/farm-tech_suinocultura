@@ -1,0 +1,51 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>LMS Suinocultura</mat-card-title>
+      <mat-card-subtitle>Faça login para continuar</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (error()) {
+        <div class="error-message">{{ error() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field class="form-field">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" />
+          @if (emailError()) {
+            <mat-error>{{ emailError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="form-field">
+          <mat-label>Senha</mat-label>
+          <input matInput type="password" formControlName="password" />
+          @if (passwordError()) {
+            <mat-error>{{ passwordError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          class="submit-button"
+          [disabled]="form.invalid || loading()"
+          type="submit">
+          @if (loading()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            Entrando...
+          } @else {
+            Entrar
+          }
+        </button>
+      </form>
+
+      <div class="signup-link">
+        Não tem conta?
+        <a routerLink="/register" class="link">Cadastre-se</a>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

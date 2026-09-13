@@ -1,24 +1,27 @@
-﻿import { Request, Response } from "express";
+﻿import { Response } from "express";
 import { CourseModel } from "../models/course.model";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export const CourseController = {
-  list: (req: Request, res: Response) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-    res.json(CourseModel.findAll(tenantId));
+  list: async (req: AuthRequest, res: Response) => {
+    const tenantId = req.tenantId!;
+    const courses = await CourseModel.findAll(tenantId);
+    res.json(courses);
   },
 
-  getById: (req: Request, res: Response) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const course = CourseModel.findById(req.params.id, tenantId);
+  getById: async (req: AuthRequest, res: Response) => {
+    const tenantId = req.tenantId!;
+    const courseId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const course = await CourseModel.findById(courseId, tenantId);
     if (!course)
       return res.status(404).json({ error: "Curso não encontrado" });
     res.json(course);
   },
 
-  create: (req: Request, res: Response) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
+  create: async (req: AuthRequest, res: Response) => {
+    const tenantId = req.tenantId!;
     const { title, description, category, authorId } = req.body;
-    const course = CourseModel.create({
+    const course = await CourseModel.create({
       tenantId,
       title,
       description,
@@ -28,17 +31,19 @@ export const CourseController = {
     res.status(201).json(course);
   },
 
-  update: (req: Request, res: Response) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const updated = CourseModel.update(req.params.id, tenantId, req.body);
+  update: async (req: AuthRequest, res: Response) => {
+    const tenantId = req.tenantId!;
+    const courseId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const updated = await CourseModel.update(courseId, tenantId, req.body);
     if (!updated)
       return res.status(404).json({ error: "Curso não encontrado" });
     res.json(updated);
   },
 
-  remove: (req: Request, res: Response) => {
-    const tenantId = req.headers["x-tenant-id"] as string;
-    const deleted = CourseModel.delete(req.params.id, tenantId);
+  remove: async (req: AuthRequest, res: Response) => {
+    const tenantId = req.tenantId!;
+    const courseId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const deleted = await CourseModel.delete(courseId, tenantId);
     if (!deleted)
       return res.status(404).json({ error: "Curso não encontrado" });
     res.status(204).send();

@@ -1,27 +1,20 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Lesson } from '../models/lesson.model';
 
 @Injectable({ providedIn: 'root' })
 export class LessonService {
   private apiUrl = 'http://localhost:3000/api/courses';
-  private headers = new HttpHeaders({ 'x-tenant-id': 'tenant-1' });
 
   constructor(private http: HttpClient) {}
 
   listByCourse(courseId: string): Observable<Lesson[]> {
-    return this.http.get<Lesson[]>(
-      `${this.apiUrl}/${courseId}/lessons`,
-      { headers: this.headers }
-    );
+    return this.http.get<Lesson[]>(`${this.apiUrl}/${courseId}/lessons`);
   }
 
   getById(courseId: string, id: string): Observable<Lesson> {
-    return this.http.get<Lesson>(
-      `${this.apiUrl}/${courseId}/lessons/${id}`,
-      { headers: this.headers }
-    );
+    return this.http.get<Lesson>(`${this.apiUrl}/${courseId}/lessons/${id}`);
   }
 
   create(
@@ -30,8 +23,7 @@ export class LessonService {
   ): Observable<Lesson> {
     return this.http.post<Lesson>(
       `${this.apiUrl}/${courseId}/lessons`,
-      lesson,
-      { headers: this.headers }
+      lesson
     );
   }
 
@@ -42,15 +34,13 @@ export class LessonService {
   ): Observable<Lesson> {
     return this.http.put<Lesson>(
       `${this.apiUrl}/${courseId}/lessons/${id}`,
-      lesson,
-      { headers: this.headers }
+      lesson
     );
   }
 
   delete(courseId: string, id: string): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${courseId}/lessons/${id}`,
-      { headers: this.headers }
+      `${this.apiUrl}/${courseId}/lessons/${id}`
     );
   }
 }

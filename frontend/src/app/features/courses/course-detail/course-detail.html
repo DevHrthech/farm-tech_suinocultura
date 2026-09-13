@@ -65,8 +65,17 @@
                   <div class="lesson-details">
                     <h3>{{ lesson.title }}</h3>
                     <p>{{ lesson.description }}</p>
-                    <a [href]="'https://youtu.be/' + lesson.videoId" target="_blank" class="video-link">
-                      Ver vídeo no YouTube →
+                    <a [href]="'https://www.youtube.com/watch?v=' + lesson.videoId"
+                       target="_blank"
+                       rel="noopener"
+                       class="video-thumbnail lesson-thumbnail"
+                       [title]="lesson.title">
+                      <img [src]="'https://img.youtube.com/vi/' + lesson.videoId + '/hqdefault.jpg'"
+                           [alt]="lesson.title"
+                           class="thumbnail-img">
+                      <div class="play-overlay">
+                        <span class="play-icon">▶</span>
+                      </div>
                     </a>
                   </div>
                   <div class="lesson-actions">

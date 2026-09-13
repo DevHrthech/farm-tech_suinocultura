@@ -1,87 +1,85 @@
-﻿export interface Course {
-  id: string;
-  tenantId: string;
-  title: string;
-  description: string;
-  category: string; // ex: "maternidade", "manejo de leitões"
-  authorId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+﻿import prisma from "../lib/prisma";
 
-// Armazenamento em memória (trocar por DB depois)
-const COURSE_IDS = {
-  MANEJO_MATERNIDADE: "course-manejo-maternidade-001",
-  NUTRICAO_LEITOES: "course-nutricao-leitoes-001",
-  SANIDADE_MATERNIDADE: "course-sanidade-maternidade-001",
-};
-
-const courses: Course[] = [
-  {
-    id: COURSE_IDS.MANEJO_MATERNIDADE,
-    tenantId: "tenant-1",
-    title: "Manejo na Maternidade",
-    description: "Cuidados essenciais com a porca e os leitões do parto ao desmame.",
-    category: "maternidade",
-    authorId: "user-1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: COURSE_IDS.NUTRICAO_LEITOES,
-    tenantId: "tenant-1",
-    title: "Nutrição de Leitões Lactentes",
-    description: "Estratégias de alimentação para garantir ganho de peso saudável na fase de lactação.",
-    category: "nutrição",
-    authorId: "user-1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: COURSE_IDS.SANIDADE_MATERNIDADE,
-    tenantId: "tenant-1",
-    title: "Sanidade na Maternidade",
-    description: "Prevenção de doenças e boas práticas de biosseguridade no setor de maternidade.",
-    category: "sanidade",
-    authorId: "user-2",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-];
-
-export { COURSE_IDS };
+const PROJETO_ID = "5119fe85-1f7e-44d3-b50c-fbf97e64c33c";
 
 export const CourseModel = {
   findAll: (tenantId: string) =>
-    courses.filter((c) => c.tenantId === tenantId),
+    prisma.course.findMany({ where: { tenantId } }),
 
   findById: (id: string, tenantId: string) =>
-    courses.find((c) => c.id === id && c.tenantId === tenantId),
+    prisma.course.findFirst({ where: { id, tenantId } }),
 
-  create: (data: Omit<Course, "id" | "createdAt" | "updatedAt">) => {
-    const course: Course = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    courses.push(course);
-    return course;
+  create: (data: {
+    title: string;
+    description: string;
+    category: string;
+    authorId: string;
+    tenantId: string;
+  }) => {
+    return prisma.course.create({
+      data: {
+        id: crypto.randomUUID(),
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        authorId: data.authorId,
+        tenantId: data.tenantId,
+        idProjeto: PROJETO_ID,
+      },
+    });
   },
 
-  update: (id: string, tenantId: string, data: Partial<Course>) => {
-    const course = CourseModel.findById(id, tenantId);
-    if (!course) return null;
-    Object.assign(course, data, { updatedAt: new Date() });
-    return course;
+  update: (id: string, tenantId: string, data: Partial<any>) => {
+    return prisma.course.updateMany({
+      where: { id, tenantId },
+      data,
+    }).then((result) => {
+      if (result.count === 0) return null;
+      return prisma.course.findFirst({ where: { id, tenantId } });
+    });
   },
 
   delete: (id: string, tenantId: string) => {
-    const index = courses.findIndex(
-      (c) => c.id === id && c.tenantId === tenantId
-    );
-    if (index === -1) return false;
-    courses.splice(index, 1);
-    return true;
+    return prisma.course.deleteMany({
+      where: { id, tenantId },
+    }).then((result) => result.count > 0);
+  },
+
+  seedCourses: async (adminUserId: string) => {
+    const courses = [
+      {
+        id: "course-manejo-maternidade-001",
+        title: "Manejo na Maternidade",
+        description: "Cuidados essenciais com a porca e os leitões do parto ao desmame.",
+        category: "maternidade",
+      },
+      {
+        id: "course-nutricao-leitoes-001",
+        title: "Nutrição de Leitões Lactentes",
+        description: "Estratégias de alimentação para garantir ganho de peso saudável na fase de lactação.",
+        category: "nutrição",
+      },
+      {
+        id: "course-sanidade-maternidade-001",
+        title: "Sanidade na Maternidade",
+        description: "Prevenção de doenças e boas práticas de biosseguridade no setor de maternidade.",
+        category: "sanidade",
+      },
+    ];
+
+    for (const course of courses) {
+      await prisma.course.upsert({
+        where: { id: course.id },
+        update: {},
+        create: {
+          ...course,
+          authorId: adminUserId,
+          tenantId: "tenant-1",
+          idProjeto: PROJETO_ID,
+        },
+      });
+    }
+
+    console.log("✅ Cursos seed criados/atualizados com sucesso");
   },
 };

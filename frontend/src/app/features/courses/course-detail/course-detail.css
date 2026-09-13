@@ -127,18 +127,51 @@
   line-height: 1.4;
 }
 
-.video-link {
+.video-thumbnail {
+  position: relative;
   display: inline-block;
-  color: #1976d2;
+  overflow: hidden;
+  border-radius: 4px;
+  cursor: pointer;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: color 0.2s;
 }
 
-.video-link:hover {
-  color: #1565c0;
-  text-decoration: underline;
+.video-thumbnail:hover .play-overlay {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.video-thumbnail:hover .play-icon {
+  transform: scale(1.1);
+}
+
+.lesson-thumbnail {
+  max-width: 160px;
+  margin-top: 8px;
+}
+
+.thumbnail-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.play-icon {
+  color: white;
+  font-size: 32px;
+  transition: transform 0.2s;
 }
 
 .lesson-actions {

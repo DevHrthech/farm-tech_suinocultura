@@ -52,7 +52,7 @@ export class LessonForm {
   constructor() {
     effect(() => {
       const cid = this.activatedRoute.snapshot.paramMap.get('courseId');
-      const lid = this.activatedRoute.snapshot.paramMap.get('id');
+      const lid = this.activatedRoute.snapshot.paramMap.get('lessonId');
       if (cid) {
         this.courseId.set(cid);
       }

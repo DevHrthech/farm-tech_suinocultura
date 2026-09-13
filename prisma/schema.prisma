@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Projeto {
+  idProjeto   String @id @map("id_projeto")
+  nomeProjeto String @map("nome_projeto")
+
+  users   User[]
+  courses Course[]
+  lessons Lesson[]
+
+  @@map("projeto")
+}
+
+model User {
+  id           String   @id
+  nomeCompleto String   @map("nome_completo")
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("admin")
+  isActive     Boolean  @default(true) @map("is_active")
+  tenantId     String   @default("tenant-1") @map("tenant_id")
+  idProjeto    String   @default("5119fe85-1f7e-44d3-b50c-fbf97e64c33c") @map("id_projeto")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  projeto Projeto  @relation(fields: [idProjeto], references: [idProjeto])
+  courses Course[] @relation("CourseAuthor")
+
+  @@map("users")
+}
+
+model Course {
+  id          String   @id
+  title       String
+  category    String
+  description String
+  authorId    String   @map("author_id")
+  tenantId    String   @default("tenant-1") @map("tenant_id")
+  idProjeto   String   @default("5119fe85-1f7e-44d3-b50c-fbf97e64c33c") @map("id_projeto")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author  User     @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  projeto Projeto  @relation(fields: [idProjeto], references: [idProjeto])
+  lessons Lesson[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id          String   @id
+  title       String
+  description String
+  videoId     String   @map("video_id")
+  lessonOrder Int      @map("lesson_order")
+  courseId    String   @map("course_id")
+  tenantId    String   @default("tenant-1") @map("tenant_id")
+  idProjeto   String   @default("5119fe85-1f7e-44d3-b50c-fbf97e64c33c") @map("id_projeto")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  projeto Projeto @relation(fields: [idProjeto], references: [idProjeto])
+
+  @@map("lessons")
+}
