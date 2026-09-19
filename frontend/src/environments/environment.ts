@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000' // Para desenvolvimento
+  apiUrl: 'https://farm-tech-suinocultura-637o.onrender.com/api' // Para desenvolvimento
 };
