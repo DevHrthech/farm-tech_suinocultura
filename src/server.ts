@@ -1,6 +1,7 @@
 ﻿import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 import { courseRoutes } from "./routes/course.routes";
 import { lessonRoutes } from "./routes/lesson.routes";
 import { videoRoutes } from "./routes/video.routes";
@@ -31,6 +32,14 @@ app.use("/api/courses/:courseId/lessons", lessonRoutes);
 app.use("/api/courses/:courseId/videos", videoRoutes);
 app.use("/api/courses/:courseId/quiz", quizRoutes);
 app.use("/api/me", meRoutes);
+
+// Serve Angular frontend build
+app.use(express.static(path.join(__dirname, "../public")));
+
+// Catch-all: serve index.html para Angular Router lidar com rotas diretas
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
 
 app.listen(PORT, async () => {
   const adminUser = await seedUsers();
