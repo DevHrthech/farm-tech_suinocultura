@@ -1,42 +1,142 @@
-<mat-toolbar class="app-toolbar" color="primary">
-  <span class="toolbar-title">LMS Suinocultura</span>
-  <span class="spacer"></span>
-  @if (authService.currentUser()) {
-    <span class="user-name">{{ authService.currentUser()!.nomeCompleto }}</span>
-    <button mat-icon-button (click)="logout()" matTooltip="Sair">
-      <mat-icon>logout</mat-icon>
-    </button>
-  }
-</mat-toolbar>
+<app-topbar></app-topbar>
 
-<div class="course-list-container">
-  <h1>Cursos</h1>
-  <button mat-flat-button color="primary" routerLink="/courses/new">+ Novo Curso</button>
+<main class="course-page">
+  <div class="hero-row">
+    <div class="hero-text">
+      <span class="eyebrow">
+        <span class="material-icons">school</span>
+        Ambiente de Aprendizado
+      </span>
+      <h1>Meus Cursos &amp; Trilhas de Especialização</h1>
+      <p class="page-subtitle">Gerencie os cursos disponíveis na plataforma.</p>
+    </div>
+
+    @if (!loading() && !error()) {
+      <div class="hero-stats">
+        <div class="stat-box">
+          <span class="material-icons">auto_stories</span>
+          <div class="stat-box-text">
+            <span class="stat-box-value">{{ courses().length }}</span>
+            <span class="stat-box-label">Cursos Publicados</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="material-icons">play_circle</span>
+          <div class="stat-box-text">
+            <span class="stat-box-value">{{ totalLessons() }}</span>
+            <span class="stat-box-label">Aulas Cadastradas</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (!loading() && !error() && courses().length > 0) {
+    <div class="toolbar-row">
+      <div class="search-shell">
+        <span class="material-icons">search</span>
+        <input
+          type="text"
+          placeholder="Buscar por título ou descrição..."
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </div>
+      <button type="button" class="primary-button" routerLink="/courses/new">
+        <span class="material-icons">add</span>
+        Novo Curso
+      </button>
+    </div>
+
+    @if (categories().length > 1) {
+      <div class="chips-row">
+        <button
+          type="button"
+          class="chip"
+          [class.chip-active]="selectedCategory() === null"
+          (click)="selectCategory(null)">
+          Todos
+        </button>
+        @for (category of categories(); track category) {
+          <button
+            type="button"
+            class="chip"
+            [class.chip-active]="selectedCategory() === category"
+            (click)="selectCategory(category)">
+            <span class="material-icons">{{ categoryIcon(category) }}</span>
+            {{ category }}
+          </button>
+        }
+      </div>
+    }
+
+    <div class="results-row">
+      {{ filteredCourses().length }} de {{ courses().length }} curso(s)
+    </div>
+  }
 
   @if (loading()) {
-    <mat-spinner></mat-spinner>
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando cursos...
+    </div>
   }
 
   @if (error()) {
-    <p class="error">{{ error() }}</p>
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
   }
 
   @if (!loading() && !error()) {
-    <div class="course-grid">
-      @for (course of courses(); track course.id) {
-        <mat-card class="course-card">
-          <mat-card-header>
-            <mat-card-title>{{ course.title }}</mat-card-title>
-            <mat-card-subtitle>{{ course.category }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p>{{ course.description }}</p>
-          </mat-card-content>
-          <mat-card-actions>
-            <button mat-button color="primary" [routerLink]="['/courses', course.id]">Ver Detalhes</button>
-          </mat-card-actions>
-        </mat-card>
-      }
-    </div>
+    @if (courses().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">menu_book</span>
+        <p>Nenhum curso cadastrado ainda.</p>
+        <button type="button" class="primary-button" routerLink="/courses/new">
+          <span class="material-icons">add</span>
+          Novo Curso
+        </button>
+      </div>
+    } @else if (filteredCourses().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">search_off</span>
+        <p>Nenhum curso encontrado para esse filtro.</p>
+        <button type="button" class="text-button" (click)="clearFilters()">Limpar filtros</button>
+      </div>
+    } @else {
+      <div class="course-grid">
+        @for (course of filteredCourses(); track course.id) {
+          <article class="course-card">
+            <div class="course-cover" [style.background]="categoryColor(course.category)">
+              <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+              @if (lessonCount(course.id) !== null) {
+                <span class="lesson-badge">
+                  <span class="material-icons">play_circle</span>
+                  {{ lessonCount(course.id) }} {{ lessonCount(course.id) === 1 ? 'aula' : 'aulas' }}
+                </span>
+              }
+            </div>
+            <div class="course-body">
+              <span class="category-pill">{{ course.category }}</span>
+              <h2 class="course-title">{{ course.title }}</h2>
+              <p class="course-description">{{ course.description }}</p>
+            </div>
+            <div class="course-footer">
+              <a class="details-link" [routerLink]="['/courses', course.id]">
+                Ver Detalhes
+                <span class="material-icons">arrow_forward</span>
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    }
   }
-</div>
+</main>
+
+<footer class="page-footer">
+  <span class="topbar-logo material-icons footer-logo">shield</span>
+  <span>SuínoPro &bull; Educação em Suinocultura</span>
+</footer>

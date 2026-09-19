@@ -6,6 +6,7 @@ export interface Lesson {
   description: string;
   videoId: string;
   order: number;
+  completed: boolean;
   createdAt: string;
   updatedAt: string;
 }

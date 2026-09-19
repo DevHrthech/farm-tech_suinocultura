@@ -1,0 +1,84 @@
+<app-topbar></app-topbar>
+
+<main class="manage-page">
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando perguntas...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && course(); as courseValue) {
+    <nav class="breadcrumb">
+      <a routerLink="/quizzes">Quizzes</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">{{ courseValue.title }}</span>
+    </nav>
+
+    <div class="header-row">
+      <button type="button" class="back-button" (click)="goBack()" aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <div>
+        <h1>Gerenciar Perguntas</h1>
+        <p class="header-subtitle">{{ courseValue.title }}</p>
+      </div>
+      <button type="button" class="primary-button" [routerLink]="['/courses', courseValue.id, 'quiz', 'questions', 'new']">
+        <span class="material-icons">add</span>
+        Adicionar Pergunta
+      </button>
+    </div>
+
+    @if (questions().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">quiz</span>
+        <p>Nenhuma pergunta cadastrada. Adicione a primeira para liberar o quiz deste curso.</p>
+      </div>
+    } @else {
+      <div class="question-list">
+        @for (question of questions(); track question.id; let i = $index) {
+          <div class="question-card">
+            <div class="question-card-header">
+              <span class="question-number">{{ i + 1 }}</span>
+              <p class="question-text">{{ question.text }}</p>
+              <div class="question-actions">
+                <button type="button" class="icon-button" [routerLink]="['/courses', courseValue.id, 'quiz', 'questions', question.id, 'edit']" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button type="button" class="icon-button icon-button-danger" (click)="deleteQuestion(question.id)" title="Remover">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="options-preview">
+              @for (option of question.options; track $index) {
+                <div class="option-preview" [class.option-preview-correct]="$index === question.correctIndex">
+                  <span class="option-letter">{{ ['A','B','C','D','E','F'][$index] }}</span>
+                  <span>{{ option }}</span>
+                  @if ($index === question.correctIndex) {
+                    <span class="material-icons correct-icon">check_circle</span>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (question.explanation) {
+              <p class="question-explanation">
+                <span class="material-icons">lightbulb</span>
+                {{ question.explanation }}
+              </p>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</main>

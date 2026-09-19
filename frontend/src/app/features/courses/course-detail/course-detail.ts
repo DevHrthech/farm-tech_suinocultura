@@ -1,28 +1,20 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { CourseService } from '../../../core/services/course.service';
 import { LessonService } from '../../../core/services/lesson.service';
 import { Course } from '../../../core/models/course.model';
 import { Lesson } from '../../../core/models/lesson.model';
+import { Topbar } from '../../../shared/topbar/topbar';
+import {
+  categoryIcon as getCategoryIcon,
+  categoryColor as getCategoryColor,
+} from '../../../core/utils/display.util';
 
 @Component({
   selector: 'app-course-detail',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule
-  ],
+  imports: [CommonModule, RouterLink, Topbar],
   templateUrl: './course-detail.html',
   styleUrl: './course-detail.css'
 })
@@ -37,6 +29,14 @@ export class CourseDetail {
   lessons = signal<Lesson[]>([]);
   loading = signal(true);
   error = signal('');
+
+  completedCount = computed(() => this.lessons().filter((lesson) => lesson.completed).length);
+
+  progressPercent = computed(() => {
+    const total = this.lessons().length;
+    if (total === 0) return 0;
+    return Math.round((this.completedCount() / total) * 100);
+  });
 
   constructor() {
     effect(() => {
@@ -64,7 +64,7 @@ export class CourseDetail {
   loadLessons(courseId: string): void {
     this.lessonService.listByCourse(courseId).subscribe({
       next: (lessons) => {
-        this.lessons.set(lessons);
+        this.lessons.set([...lessons].sort((a, b) => a.order - b.order));
         this.loading.set(false);
       },
       error: (err) => {
@@ -87,6 +87,14 @@ export class CourseDetail {
         }
       });
     }
+  }
+
+  categoryIcon(category: string): string {
+    return getCategoryIcon(category);
+  }
+
+  categoryColor(category: string): string {
+    return getCategoryColor(category);
   }
 
   goBack(): void {

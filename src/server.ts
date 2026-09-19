@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { courseRoutes } from "./routes/course.routes";
 import { lessonRoutes } from "./routes/lesson.routes";
 import { videoRoutes } from "./routes/video.routes";
+import { quizRoutes } from "./routes/quiz.routes";
+import { meRoutes } from "./routes/me.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { authMiddleware } from "./middleware/auth.middleware";
 import { seedUsers } from "./models/user.model";
@@ -27,6 +29,8 @@ app.use(authMiddleware);
 app.use("/api/courses", courseRoutes);
 app.use("/api/courses/:courseId/lessons", lessonRoutes);
 app.use("/api/courses/:courseId/videos", videoRoutes);
+app.use("/api/courses/:courseId/quiz", quizRoutes);
+app.use("/api/me", meRoutes);
 
 app.listen(PORT, async () => {
   const adminUser = await seedUsers();

@@ -2,26 +2,12 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -31,6 +17,7 @@ export class LoginComponent {
   error = signal('');
   emailError = signal('');
   passwordError = signal('');
+  showPassword = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -40,10 +27,15 @@ export class LoginComponent {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [true],
     });
 
     this.form.get('email')?.valueChanges.subscribe(() => this.updateEmailError());
     this.form.get('password')?.valueChanges.subscribe(() => this.updatePasswordError());
+  }
+
+  togglePassword(): void {
+    this.showPassword.set(!this.showPassword());
   }
 
   private updateEmailError(): void {
@@ -79,10 +71,12 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
 
-    this.authService.login(this.form.value).subscribe({
+    const { email, password } = this.form.value;
+
+    this.authService.login({ email, password }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/courses']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.loading.set(false);

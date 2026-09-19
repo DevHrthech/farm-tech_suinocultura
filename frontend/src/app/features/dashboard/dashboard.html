@@ -1,0 +1,145 @@
+<app-topbar></app-topbar>
+
+<main class="dashboard-page">
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando painel...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && !error() && data(); as dashboard) {
+    <div class="greeting-row">
+      <div>
+        <span class="eyebrow">
+          <span class="material-icons">waving_hand</span>
+          Bem-vindo de volta
+        </span>
+        <h1>Olá, {{ firstName() }}!</h1>
+        <p class="page-subtitle">Acompanhe seu progresso nos cursos de suinocultura de precisão.</p>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="material-icons">auto_stories</span>
+        <div class="stat-box-text">
+          <span class="stat-box-value">{{ dashboard.stats.coursesStarted }}/{{ dashboard.stats.totalCourses }}</span>
+          <span class="stat-box-label">Cursos Iniciados</span>
+        </div>
+      </div>
+      <div class="stat-box">
+        <span class="material-icons">check_circle</span>
+        <div class="stat-box-text">
+          <span class="stat-box-value">{{ dashboard.stats.totalCompleted }}/{{ dashboard.stats.totalLessons }}</span>
+          <span class="stat-box-label">Aulas Concluídas</span>
+        </div>
+      </div>
+      <div class="stat-box">
+        <span class="material-icons">quiz</span>
+        <div class="stat-box-text">
+          <span class="stat-box-value">{{ dashboard.stats.quizzesTaken }}</span>
+          <span class="stat-box-label">Quizzes Realizados</span>
+        </div>
+      </div>
+      @if (dashboard.stats.avgQuizScore !== null) {
+        <div class="stat-box">
+          <span class="material-icons">military_tech</span>
+          <div class="stat-box-text">
+            <span class="stat-box-value">{{ dashboard.stats.avgQuizScore }}%</span>
+            <span class="stat-box-label">Aproveitamento Médio</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="resume-card">
+      @if (dashboard.lastLesson; as last) {
+        <div class="resume-info">
+          <span class="resume-label">Continue de onde parou</span>
+          <h2 class="resume-title">{{ last.lessonTitle }}</h2>
+          <p class="resume-course">{{ last.courseTitle }}</p>
+          <span class="resume-time">Assistido {{ timeAgo(last.watchedAt) }}</span>
+        </div>
+        <a class="primary-button" [routerLink]="['/courses', last.courseId, 'lessons', last.lessonId]">
+          Continuar Aula
+          <span class="material-icons">arrow_forward</span>
+        </a>
+      } @else {
+        <div class="resume-info">
+          <span class="resume-label">Comece agora</span>
+          <h2 class="resume-title">Você ainda não assistiu nenhuma aula</h2>
+          <p class="resume-course">Escolha um curso e comece sua trilha de aprendizado.</p>
+        </div>
+        <a class="primary-button" routerLink="/courses">
+          Ver Cursos
+          <span class="material-icons">arrow_forward</span>
+        </a>
+      }
+    </div>
+
+    <div class="dashboard-columns">
+      <section class="courses-section">
+        <h2 class="section-title">Meus Cursos</h2>
+        <div class="course-progress-list">
+          @for (course of dashboard.coursesProgress; track course.courseId) {
+            <div class="course-progress-card">
+              <div class="course-progress-cover" [style.background]="categoryColor(course.category)">
+                <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+              </div>
+              <div class="course-progress-body">
+                <h3>{{ course.courseTitle }}</h3>
+                <div class="progress-row">
+                  <span>{{ course.completedLessons }} de {{ course.totalLessons }} aulas</span>
+                  <span class="progress-percent">{{ course.percent }}%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" [style.width.%]="course.percent"></div>
+                </div>
+              </div>
+              <a class="course-progress-link" [routerLink]="['/courses', course.courseId]">
+                {{ course.completedLessons > 0 ? 'Continuar' : 'Começar' }}
+                <span class="material-icons">arrow_forward</span>
+              </a>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="activity-section">
+        <h2 class="section-title">Atividade Recente</h2>
+        @if (dashboard.activity.length === 0) {
+          <div class="empty-activity">
+            <span class="material-icons">history</span>
+            <p>Nenhuma atividade registrada ainda.</p>
+          </div>
+        } @else {
+          <div class="activity-list">
+            @for (item of dashboard.activity; track $index) {
+              <div class="activity-item">
+                <span class="activity-icon" [class.activity-icon-quiz]="item.type === 'quiz'">
+                  <span class="material-icons">{{ item.type === 'quiz' ? 'quiz' : 'play_circle' }}</span>
+                </span>
+                <div class="activity-text">
+                  @if (item.type === 'lesson') {
+                    <p><strong>{{ item.lessonTitle }}</strong> concluída</p>
+                  } @else {
+                    <p>Quiz concluído — <strong>{{ item.score }}/{{ item.total }}</strong> acertos</p>
+                  }
+                  <span class="activity-meta">{{ item.courseTitle }} &bull; {{ timeAgo(item.at) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+</main>

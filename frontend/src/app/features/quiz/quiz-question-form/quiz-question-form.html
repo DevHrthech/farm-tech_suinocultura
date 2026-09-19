@@ -1,0 +1,87 @@
+<div class="form-page">
+  <div class="form-shell">
+    <div class="form-header">
+      <button type="button" class="back-button" (click)="goBack()" aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <h1>{{ isEdit() ? 'Editar Pergunta' : 'Nova Pergunta' }}</h1>
+    </div>
+
+    @if (loading()) {
+      <div class="state-row">
+        <span class="spinner"></span>
+        Carregando pergunta...
+      </div>
+    } @else {
+      @if (submitError()) {
+        <div class="error-banner">
+          <span class="material-icons">error_outline</span>
+          {{ submitError() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="question-form">
+        <div class="field">
+          <label class="field-label" for="text">Enunciado da pergunta</label>
+          <textarea id="text" formControlName="text" rows="3" placeholder="Digite a pergunta..."></textarea>
+          @if (form.get('text')?.touched && form.get('text')?.invalid) {
+            <span class="field-error">Digite um enunciado com pelo menos 10 caracteres</span>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label">Alternativas <span class="field-hint">(marque a correta)</span></label>
+          <div class="options-editor" formArrayName="options">
+            @for (option of options.controls; track $index) {
+              <div class="option-row">
+                <button
+                  type="button"
+                  class="correct-toggle"
+                  [class.correct-toggle-active]="form.get('correctIndex')?.value === $index"
+                  (click)="selectCorrect($index)"
+                  [attr.aria-label]="'Marcar alternativa ' + (['A','B','C','D','E','F'][$index]) + ' como correta'">
+                  <span class="material-icons">{{ form.get('correctIndex')?.value === $index ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                </button>
+                <span class="option-letter">{{ ['A','B','C','D','E','F'][$index] }}</span>
+                <input type="text" [formControlName]="$index" [placeholder]="'Alternativa ' + (['A','B','C','D','E','F'][$index])" />
+                @if (options.length > 2) {
+                  <button type="button" class="remove-option" (click)="removeOption($index)" title="Remover alternativa">
+                    <span class="material-icons">close</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          @if (options.length < 6) {
+            <button type="button" class="add-option-button" (click)="addOption()">
+              <span class="material-icons">add</span>
+              Adicionar alternativa
+            </button>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="explanation">Explicação <span class="field-hint">(opcional, exibida após responder)</span></label>
+          <textarea id="explanation" formControlName="explanation" rows="3" placeholder="Explique por que a alternativa correta está certa..."></textarea>
+        </div>
+
+        <div class="field field-narrow">
+          <label class="field-label" for="order">Ordem</label>
+          <input id="order" type="number" formControlName="order" min="1" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="secondary-button" (click)="goBack()">Cancelar</button>
+          <button type="submit" class="primary-button" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="spinner spinner-light"></span>
+              Salvando...
+            } @else {
+              {{ isEdit() ? 'Salvar Alterações' : 'Criar Pergunta' }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

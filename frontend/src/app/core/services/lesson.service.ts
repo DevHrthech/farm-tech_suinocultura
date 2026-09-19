@@ -19,7 +19,7 @@ export class LessonService {
 
   create(
     courseId: string,
-    lesson: Omit<Lesson, 'id' | 'createdAt' | 'updatedAt' | 'tenantId' | 'courseId'>
+    lesson: Omit<Lesson, 'id' | 'createdAt' | 'updatedAt' | 'tenantId' | 'courseId' | 'completed'>
   ): Observable<Lesson> {
     return this.http.post<Lesson>(
       `${this.apiUrl}/${courseId}/lessons`,
@@ -41,6 +41,19 @@ export class LessonService {
   delete(courseId: string, id: string): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${courseId}/lessons/${id}`
+    );
+  }
+
+  complete(courseId: string, id: string): Observable<Lesson> {
+    return this.http.post<Lesson>(
+      `${this.apiUrl}/${courseId}/lessons/${id}/complete`,
+      {}
+    );
+  }
+
+  uncomplete(courseId: string, id: string): Observable<Lesson> {
+    return this.http.delete<Lesson>(
+      `${this.apiUrl}/${courseId}/lessons/${id}/complete`
     );
   }
 }

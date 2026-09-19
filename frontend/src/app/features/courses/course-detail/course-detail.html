@@ -1,97 +1,132 @@
-<div class="course-detail-container">
+<app-topbar></app-topbar>
+
+<main class="course-detail-page">
   @if (loading()) {
-    <div class="loading-center">
-      <mat-spinner></mat-spinner>
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando curso...
     </div>
-  } @else if (error()) {
-    <p class="error">{{ error() }}</p>
-    <button mat-flat-button (click)="goBack()">Voltar</button>
-  } @else if (course()) {
-    <div class="course-header">
-      <button mat-icon-button (click)="goBack()" class="back-button">
-        <mat-icon>arrow_back</mat-icon>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+      <button type="button" class="text-button" (click)="goBack()">Voltar</button>
+    </div>
+  }
+
+  @if (!loading() && !error() && course(); as courseValue) {
+    <nav class="breadcrumb">
+      <a routerLink="/courses">Cursos</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">{{ courseValue.title }}</span>
+    </nav>
+
+    <div class="course-header-row">
+      <button type="button" class="back-button" (click)="goBack()" aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
       </button>
-      <h1>{{ course()!.title }}</h1>
+      <h1>{{ courseValue.title }}</h1>
     </div>
 
-    <mat-card class="course-card">
-      <mat-card-content>
-        <div class="course-info">
-          <div class="info-item">
-            <strong>Categoria:</strong>
-            <span>{{ course()!.category }}</span>
-          </div>
-          <div class="info-item">
-            <strong>Autor:</strong>
-            <span>{{ course()!.authorId }}</span>
-          </div>
-          <div class="info-item">
-            <strong>Descrição:</strong>
-            <p>{{ course()!.description }}</p>
-          </div>
-          <div class="info-item">
-            <strong>Data de Criação:</strong>
-            <span>{{ course()!.createdAt | date: 'dd/MM/yyyy' }}</span>
-          </div>
+    <div class="course-card">
+      <div class="course-card-top">
+        <div class="course-cover" [style.background]="categoryColor(courseValue.category)">
+          <span class="material-icons">{{ categoryIcon(courseValue.category) }}</span>
         </div>
 
-        <div class="actions">
-          <button mat-raised-button color="primary" [routerLink]="['/courses', course()!.id, 'edit']">
-            <mat-icon>edit</mat-icon>
-            Editar Curso
-          </button>
+        <div class="course-info">
+          <span class="category-pill">{{ courseValue.category }}</span>
+          <p class="course-description">{{ courseValue.description }}</p>
+
+          <div class="course-meta">
+            <div class="meta-item">
+              <span class="material-icons">event</span>
+              Criado em {{ courseValue.createdAt | date: 'dd/MM/yyyy' }}
+            </div>
+            <div class="meta-item">
+              <span class="material-icons">badge</span>
+              Autor: <span class="meta-id">{{ courseValue.authorId }}</span>
+            </div>
+          </div>
+
+          @if (lessons().length > 0) {
+            <div class="progress-row">
+              <span>{{ completedCount() }} de {{ lessons().length }} aulas concluídas</span>
+              <span class="progress-percent">{{ progressPercent() }}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+            </div>
+          }
         </div>
-      </mat-card-content>
-    </mat-card>
+      </div>
+
+      <div class="course-actions">
+        <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'edit']">
+          <span class="material-icons">edit</span>
+          Editar Curso
+        </button>
+        <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'quiz', 'manage']">
+          <span class="material-icons">quiz</span>
+          Gerenciar Quiz
+        </button>
+      </div>
+    </div>
 
     <div class="lessons-section">
       <div class="lessons-header">
         <h2>Aulas ({{ lessons().length }})</h2>
-        <button mat-raised-button color="accent" [routerLink]="['/courses', course()!.id, 'lessons', 'new']">
-          <mat-icon>add</mat-icon>
+        <button type="button" class="primary-button" [routerLink]="['/courses', courseValue.id, 'lessons', 'new']">
+          <span class="material-icons">add</span>
           Adicionar Aula
         </button>
       </div>
 
       @if (lessons().length === 0) {
-        <p class="no-lessons">Nenhuma aula cadastrada. Comece adicionando uma!</p>
+        <div class="empty-state">
+          <span class="material-icons">menu_book</span>
+          <p>Nenhuma aula cadastrada. Comece adicionando uma!</p>
+        </div>
       } @else {
         <div class="lessons-list">
           @for (lesson of lessons(); track lesson.id) {
-            <mat-card class="lesson-card">
-              <mat-card-content>
-                <div class="lesson-info">
-                  <div class="lesson-number">{{ lesson.order + 1 }}</div>
-                  <div class="lesson-details">
-                    <h3>{{ lesson.title }}</h3>
-                    <p>{{ lesson.description }}</p>
-                    <a [href]="'https://www.youtube.com/watch?v=' + lesson.videoId"
-                       target="_blank"
-                       rel="noopener"
-                       class="video-thumbnail lesson-thumbnail"
-                       [title]="lesson.title">
-                      <img [src]="'https://img.youtube.com/vi/' + lesson.videoId + '/hqdefault.jpg'"
-                           [alt]="lesson.title"
-                           class="thumbnail-img">
-                      <div class="play-overlay">
-                        <span class="play-icon">▶</span>
-                      </div>
-                    </a>
-                  </div>
-                  <div class="lesson-actions">
-                    <button mat-icon-button [routerLink]="['/courses', course()!.id, 'lessons', lesson.id, 'edit']" matTooltip="Editar">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="deleteLesson(lesson.id)" matTooltip="Deletar">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
+            <div class="lesson-card">
+              <div class="lesson-status" [class.lesson-status-done]="lesson.completed">
+                @if (lesson.completed) {
+                  <span class="material-icons">check</span>
+                } @else {
+                  {{ lesson.order }}
+                }
+              </div>
+
+              <a [routerLink]="['/courses', courseValue.id, 'lessons', lesson.id]" class="lesson-thumbnail" [title]="lesson.title">
+                <img [src]="'https://img.youtube.com/vi/' + lesson.videoId + '/hqdefault.jpg'" [alt]="lesson.title" class="thumbnail-img">
+                <div class="play-overlay">
+                  <span class="material-icons">play_arrow</span>
                 </div>
-              </mat-card-content>
-            </mat-card>
+              </a>
+
+              <div class="lesson-details">
+                <a [routerLink]="['/courses', courseValue.id, 'lessons', lesson.id]" class="lesson-title-link">
+                  <h3>{{ lesson.title }}</h3>
+                </a>
+                <p>{{ lesson.description }}</p>
+              </div>
+
+              <div class="lesson-actions">
+                <button type="button" class="icon-button" [routerLink]="['/courses', courseValue.id, 'lessons', lesson.id, 'edit']" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button type="button" class="icon-button icon-button-danger" (click)="deleteLesson(lesson.id)" title="Deletar">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </div>
           }
         </div>
       }
     </div>
   }
-</div>
+</main>

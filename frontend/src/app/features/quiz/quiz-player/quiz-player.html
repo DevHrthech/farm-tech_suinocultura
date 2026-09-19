@@ -1,0 +1,167 @@
+<app-topbar></app-topbar>
+
+<main class="quiz-play-page">
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando quiz...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+      <a routerLink="/quizzes" class="text-link">Voltar para Quizzes</a>
+    </div>
+  }
+
+  @if (!loading() && !error() && course(); as courseValue) {
+    <nav class="breadcrumb">
+      <a routerLink="/quizzes">Quizzes</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">{{ courseValue.title }}</span>
+    </nav>
+
+    @if (!finished()) {
+      <div class="progress-header">
+        <span class="progress-label">Pergunta {{ currentIndex() + 1 }} de {{ totalQuestions() }}</span>
+        <span class="progress-percent">{{ progressPercent() }}% concluído</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+      </div>
+
+      @if (currentQuestion(); as question) {
+        <div class="question-card">
+          <p class="question-text">{{ question.text }}</p>
+
+          <div class="options-list">
+            @for (option of question.options; track $index) {
+              <button
+                type="button"
+                class="option-button"
+                [class.option-selected]="selectedIndex() === $index && !confirmed()"
+                [class.option-correct]="confirmed() && $index === question.correctIndex"
+                [class.option-wrong]="confirmed() && selectedIndex() === $index && $index !== question.correctIndex"
+                [disabled]="confirmed()"
+                (click)="selectOption($index)">
+                <span class="option-letter">{{ ['A','B','C','D','E','F'][$index] }}</span>
+                <span class="option-text">{{ option }}</span>
+                @if (confirmed() && $index === question.correctIndex) {
+                  <span class="material-icons option-icon">check_circle</span>
+                } @else if (confirmed() && selectedIndex() === $index) {
+                  <span class="material-icons option-icon">cancel</span>
+                }
+              </button>
+            }
+          </div>
+
+          @if (confirmed() && question.explanation) {
+            <div class="explanation-box">
+              <span class="material-icons">lightbulb</span>
+              <p>{{ question.explanation }}</p>
+            </div>
+          }
+
+          <div class="question-actions">
+            @if (!confirmed()) {
+              <button type="button" class="text-button" (click)="skipQuestion()">Pular Pergunta</button>
+              <button
+                type="button"
+                class="primary-button"
+                [disabled]="selectedIndex() === null"
+                (click)="confirmAnswer()">
+                Confirmar Resposta
+              </button>
+            } @else {
+              <span class="feedback-label" [class.feedback-correct]="answerFor(question.id)?.correct" [class.feedback-wrong]="!answerFor(question.id)?.correct">
+                <span class="material-icons">{{ answerFor(question.id)?.correct ? 'check_circle' : 'cancel' }}</span>
+                {{ answerFor(question.id)?.correct ? 'Resposta correta!' : 'Resposta incorreta' }}
+              </span>
+              <button type="button" class="primary-button" [disabled]="submitting()" (click)="goToNext()">
+                @if (submitting()) {
+                  <span class="spinner spinner-light"></span>
+                  Salvando...
+                } @else if (isLastQuestion()) {
+                  Ver Resultado
+                  <span class="material-icons">flag</span>
+                } @else {
+                  Próxima Pergunta
+                  <span class="material-icons">arrow_forward</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="results-card">
+        @if (saveError()) {
+          <div class="save-error-banner">
+            <span class="material-icons">warning</span>
+            {{ saveError() }}
+          </div>
+        }
+
+        <div class="score-summary">
+          <div class="score-ring" [style.background]="'conic-gradient(#1c5c3d ' + scorePercent() + '%, #e7e9f5 0)'">
+            <div class="score-ring-inner">
+              <span class="score-value">{{ scorePercent() }}%</span>
+            </div>
+          </div>
+          <div class="score-text">
+            <h2>Quiz concluído!</h2>
+            <p>Você acertou {{ correctCount() }} de {{ totalQuestions() }} perguntas sobre <strong>{{ courseValue.title }}</strong>.</p>
+            <div class="score-actions">
+              <button type="button" class="secondary-button" (click)="restart()">
+                <span class="material-icons">replay</span>
+                Refazer Quiz
+              </button>
+              <a class="primary-link" routerLink="/quizzes">
+                Voltar para Quizzes
+                <span class="material-icons">arrow_forward</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="review-title">Revisão das Perguntas</h3>
+        <div class="review-list">
+          @for (question of questions(); track question.id; let i = $index) {
+            <div class="review-item">
+              <div class="review-header">
+                <span class="review-index" [class.review-index-correct]="answerFor(question.id)?.correct" [class.review-index-wrong]="!answerFor(question.id)?.correct">
+                  <span class="material-icons">{{ answerFor(question.id)?.correct ? 'check' : 'close' }}</span>
+                </span>
+                <p class="review-question">{{ i + 1 }}. {{ question.text }}</p>
+              </div>
+
+              <div class="review-options">
+                @for (option of question.options; track $index) {
+                  <div
+                    class="review-option"
+                    [class.review-option-correct]="$index === question.correctIndex"
+                    [class.review-option-selected-wrong]="answerFor(question.id)?.selectedIndex === $index && $index !== question.correctIndex">
+                    <span class="option-letter">{{ ['A','B','C','D','E','F'][$index] }}</span>
+                    <span class="option-text">{{ option }}</span>
+                    @if (answerFor(question.id)?.selectedIndex === $index) {
+                      <span class="review-your-answer">Sua resposta</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (question.explanation) {
+                <div class="explanation-box">
+                  <span class="material-icons">lightbulb</span>
+                  <p>{{ question.explanation }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</main>

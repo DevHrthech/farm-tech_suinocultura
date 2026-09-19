@@ -1,51 +1,124 @@
-<div class="login-container">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>LMS Suinocultura</mat-card-title>
-      <mat-card-subtitle>Faça login para continuar</mat-card-subtitle>
-    </mat-card-header>
+<div class="login-page">
+  <section class="login-panel">
+    <div class="login-panel-inner">
+      <header class="brand-row">
+        <div class="brand">
+          <span class="brand-logo material-icons">shield</span>
+          <div class="brand-text">
+            <span class="brand-name">SuínoPro</span>
+            <span class="brand-tagline">ACADEMIA DE PRECISÃO</span>
+          </div>
+        </div>
+        <span class="badge badge-muted">
+          <span class="dot"></span>
+          Turma Ativa 2025
+        </span>
+      </header>
 
-    <mat-card-content>
+      <h1 class="welcome-title">
+        Bem-vindo de volta, <span class="accent">Especialista!</span>
+      </h1>
+      <p class="welcome-subtitle">
+        Acesse sua trilha de aprendizado e continue acumulando XP na suinocultura de precisão.
+      </p>
+
       @if (error()) {
         <div class="error-message">{{ error() }}</div>
       }
 
-      <form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field class="form-field">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" />
+      <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
+        <div class="field">
+          <label class="field-label" for="email">E-mail institucional ou CPF</label>
+          <div class="input-shell">
+            <span class="material-icons input-icon">badge</span>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="ex: veterinario&#64;granja.com.br ou 000.000.000-00"
+            />
+          </div>
           @if (emailError()) {
-            <mat-error>{{ emailError() }}</mat-error>
+            <span class="field-error">{{ emailError() }}</span>
           }
-        </mat-form-field>
+        </div>
 
-        <mat-form-field class="form-field">
-          <mat-label>Senha</mat-label>
-          <input matInput type="password" formControlName="password" />
+        <div class="field">
+          <div class="field-label-row">
+            <label class="field-label" for="password">Senha de acesso</label>
+            <a class="link-muted" href="javascript:void(0)">Esqueceu a senha?</a>
+          </div>
+          <div class="input-shell">
+            <span class="material-icons input-icon">lock</span>
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Digite seus caracteres seguros"
+            />
+            <button
+              type="button"
+              class="icon-toggle"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Ocultar senha' : 'Mostrar senha'">
+              <span class="material-icons">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
           @if (passwordError()) {
-            <mat-error>{{ passwordError() }}</mat-error>
+            <span class="field-error">{{ passwordError() }}</span>
           }
-        </mat-form-field>
+        </div>
+
+        <div class="options-row">
+          <label class="checkbox">
+            <input type="checkbox" formControlName="rememberMe" />
+            <span class="checkbox-box">
+              <span class="material-icons">check</span>
+            </span>
+            Lembrar neste dispositivo
+          </label>
+          <span class="xp-hint">
+            <span class="material-icons">bolt</span>
+            +10 XP diário
+          </span>
+        </div>
 
         <button
-          mat-flat-button
-          color="primary"
+          type="submit"
           class="submit-button"
-          [disabled]="form.invalid || loading()"
-          type="submit">
+          [disabled]="form.invalid || loading()">
           @if (loading()) {
-            <mat-spinner diameter="20"></mat-spinner>
+            <span class="spinner"></span>
             Entrando...
           } @else {
-            Entrar
+            Entrar na Plataforma
+            <span class="material-icons">arrow_forward</span>
           }
         </button>
       </form>
+
+      <div class="divider">
+        <span>OU VALIDE SUA IDENTIDADE</span>
+      </div>
+
+      <button type="button" class="govbr-button" disabled title="Em breve">
+        <span class="material-icons">verified_user</span>
+        Acessar com Gov.br / Certificado Agro
+      </button>
 
       <div class="signup-link">
         Não tem conta?
         <a routerLink="/register" class="link">Cadastre-se</a>
       </div>
-    </mat-card-content>
-  </mat-card>
+
+      <footer class="login-footer">
+        <span>Dúvidas no acesso? <a class="link" href="javascript:void(0)">Fale com a Tutoria</a></span>
+        <span class="footer-meta">v4.8.2 &bull; BioProtocols Safe</span>
+      </footer>
+    </div>
+  </section>
+
+  <section class="promo-panel">
+    <img class="promo-cover" src="images/capa-tela-login.png" alt="Capa da plataforma SuínoPro" />
+  </section>
 </div>

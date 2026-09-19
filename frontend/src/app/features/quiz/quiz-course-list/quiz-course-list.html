@@ -1,0 +1,104 @@
+<app-topbar></app-topbar>
+
+<main class="quiz-page">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">
+        <span class="material-icons">quiz</span>
+        Avalie seu conhecimento
+      </span>
+      <h1>Provas &amp; Quizzes por Curso</h1>
+      <p class="page-subtitle">Escolha um curso para testar o que você aprendeu nas aulas.</p>
+    </div>
+
+    @if (!loading() && !error()) {
+      <div class="hero-stats">
+        <div class="stat-box">
+          <span class="material-icons">library_books</span>
+          <div class="stat-box-text">
+            <span class="stat-box-value">{{ coursesWithQuiz() }}</span>
+            <span class="stat-box-label">Cursos com Quiz</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <span class="material-icons">help_outline</span>
+          <div class="stat-box-text">
+            <span class="stat-box-value">{{ totalQuestions() }}</span>
+            <span class="stat-box-label">Perguntas Cadastradas</span>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando cursos...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && !error()) {
+    @if (courses().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">menu_book</span>
+        <p>Nenhum curso cadastrado ainda.</p>
+      </div>
+    } @else {
+      <div class="quiz-grid">
+        @for (course of courses(); track course.id) {
+          <article class="quiz-card">
+            <div class="quiz-cover" [style.background]="categoryColor(course.category)">
+              <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+            </div>
+
+            <div class="quiz-body">
+              <span class="category-pill">{{ course.category }}</span>
+              <h2 class="quiz-title">{{ course.title }}</h2>
+              <p class="quiz-description">{{ course.description }}</p>
+
+              <div class="quiz-meta">
+                @if (questionCount(course.id) !== null) {
+                  <span class="meta-chip">
+                    <span class="material-icons">help_outline</span>
+                    {{ questionCount(course.id) }} {{ questionCount(course.id) === 1 ? 'pergunta' : 'perguntas' }}
+                  </span>
+                }
+                @if (lastScorePercent(course.id) !== null) {
+                  <span class="meta-chip meta-chip-score">
+                    <span class="material-icons">military_tech</span>
+                    Última nota: {{ lastScorePercent(course.id) }}%
+                  </span>
+                }
+              </div>
+            </div>
+
+            <div class="quiz-footer">
+              @if (questionCount(course.id) === 0) {
+                <span class="no-quiz-label">Quiz ainda não disponível para este curso</span>
+              } @else if (questionCount(course.id) === null) {
+                <span class="no-quiz-label">Verificando perguntas...</span>
+              } @else {
+                <a class="primary-link" [routerLink]="['/courses', course.id, 'quiz']">
+                  Fazer Quiz
+                  <span class="material-icons">arrow_forward</span>
+                </a>
+              }
+              <a class="manage-link" [routerLink]="['/courses', course.id, 'quiz', 'manage']">
+                <span class="material-icons">tune</span>
+                Gerenciar Perguntas
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+</main>

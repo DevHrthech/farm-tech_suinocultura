@@ -1,0 +1,28 @@
+<header class="app-topbar">
+  <div class="topbar-brand">
+    <span class="topbar-logo material-icons">shield</span>
+    <div class="topbar-brand-text">
+      <span class="brand-name">SuínoPro</span>
+      <span class="brand-tagline">Educação em Suinocultura</span>
+    </div>
+  </div>
+
+  <nav class="topbar-nav">
+    <a routerLink="/dashboard" routerLinkActive="nav-link-active" class="nav-link">Painel</a>
+    <a routerLink="/courses" routerLinkActive="nav-link-active" class="nav-link">Cursos</a>
+    <a routerLink="/quizzes" routerLinkActive="nav-link-active" class="nav-link">Quizzes</a>
+  </nav>
+
+  @if (authService.currentUser(); as user) {
+    <div class="topbar-user">
+      <div class="user-avatar">{{ userInitials() }}</div>
+      <div class="user-text">
+        <span class="user-name">{{ user.nomeCompleto }}</span>
+        <span class="user-role">{{ roleLabel() }}</span>
+      </div>
+      <button type="button" class="logout-button" (click)="logout()" title="Sair" aria-label="Sair">
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  }
+</header>

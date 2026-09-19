@@ -1,0 +1,115 @@
+<app-topbar></app-topbar>
+
+<main class="lesson-page">
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando aula...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && !error() && course() && currentLesson(); as lesson) {
+    <nav class="breadcrumb">
+      <a routerLink="/courses">Cursos</a>
+      <span class="material-icons">chevron_right</span>
+      <a [routerLink]="['/courses', courseId()]">{{ course()!.title }}</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">{{ currentLesson()!.title }}</span>
+    </nav>
+
+    <div class="lesson-layout">
+      <div class="lesson-main">
+        <div class="video-shell">
+          @if (videoUrl()) {
+            <iframe
+              [src]="videoUrl()"
+              title="Player da aula"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+          }
+        </div>
+
+        <div class="lesson-info-row">
+          <div>
+            <h1 class="lesson-title">{{ currentLesson()!.title }}</h1>
+            <span class="lesson-order-label">Aula {{ currentLesson()!.order }} de {{ lessons().length }}</span>
+          </div>
+          <button
+            type="button"
+            class="complete-button"
+            [class.complete-button-done]="currentLesson()!.completed"
+            [disabled]="updatingCompletion()"
+            (click)="toggleComplete()">
+            <span class="material-icons">{{ currentLesson()!.completed ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            {{ currentLesson()!.completed ? 'Aula Concluída' : 'Marcar como Concluída' }}
+          </button>
+        </div>
+
+        <p class="lesson-description">{{ currentLesson()!.description }}</p>
+
+        <div class="nav-buttons">
+          <button
+            type="button"
+            class="nav-button"
+            [disabled]="!previousLesson()"
+            (click)="goToPrevious()">
+            <span class="material-icons">arrow_back</span>
+            Aula Anterior
+          </button>
+          <button
+            type="button"
+            class="nav-button nav-button-primary"
+            [disabled]="!nextLesson()"
+            (click)="goToNext()">
+            Próxima Aula
+            <span class="material-icons">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <aside class="lesson-sidebar">
+        <div class="progress-card">
+          <span class="progress-card-label">Progresso no curso</span>
+          <div class="progress-card-row">
+            <span class="progress-card-value">{{ completedCount() }} de {{ lessons().length }} aulas concluídas</span>
+            <span class="progress-card-percent">{{ progressPercent() }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <span class="content-card-title">Conteúdo do Curso</span>
+          <div class="content-list">
+            @for (item of lessons(); track item.id) {
+              <button
+                type="button"
+                class="content-item"
+                [class.content-item-active]="item.id === lesson.id"
+                (click)="goToLesson(item)">
+                <span class="content-item-status" [class.content-item-status-done]="item.completed">
+                  @if (item.completed) {
+                    <span class="material-icons">check</span>
+                  } @else {
+                    {{ item.order }}
+                  }
+                </span>
+                <span class="content-item-title">{{ item.title }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      </aside>
+    </div>
+  }
+</main>

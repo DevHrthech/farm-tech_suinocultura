@@ -134,7 +134,7 @@ export class RegisterComponent {
     this.authService.register(data).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/courses']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.loading.set(false);
