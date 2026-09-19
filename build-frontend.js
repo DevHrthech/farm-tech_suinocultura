@@ -4,7 +4,7 @@ const path = require('path');
 
 try {
   console.log('Building Angular frontend...');
-  execSync('cd frontend && npm run build', { stdio: 'inherit' });
+  execSync('cd frontend && npm install && npm run build', { stdio: 'inherit' });
 
   const publicDir = path.join(__dirname, 'public');
   const sourceDir = path.join(__dirname, 'frontend', 'dist', 'frontend', 'browser');
