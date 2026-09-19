@@ -7,7 +7,7 @@ try {
   execSync('cd frontend && npm run build', { stdio: 'inherit' });
 
   const publicDir = path.join(__dirname, 'public');
-  const sourceDir = path.join(__dirname, 'dist', 'frontend', 'browser');
+  const sourceDir = path.join(__dirname, 'frontend', 'dist', 'frontend', 'browser');
 
   console.log('Removing old public directory...');
   if (fs.existsSync(publicDir)) {

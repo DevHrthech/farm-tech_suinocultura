@@ -1,4 +1,4 @@
-﻿import express from "express";
+import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
@@ -20,24 +20,25 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({ message: "LMS Suinocultura API rodando 🐷" });
+// Rotas públicas (sem autenticação)
+app.get("/api/status", (req, res) => {
+  res.json({ message: "LMS Suinocultura API rodando ??" });
 });
 
 app.use("/api/auth", authRoutes);
 
-app.use(authMiddleware);
-app.use("/api/courses", courseRoutes);
-app.use("/api/courses/:courseId/lessons", lessonRoutes);
-app.use("/api/courses/:courseId/videos", videoRoutes);
-app.use("/api/courses/:courseId/quiz", quizRoutes);
-app.use("/api/me", meRoutes);
+// Rotas protegidas (com autenticação) - middleware aplicado DENTRO de cada router, não globalmente
+app.use("/api/courses", authMiddleware, courseRoutes);
+app.use("/api/courses/:courseId/lessons", authMiddleware, lessonRoutes);
+app.use("/api/courses/:courseId/videos", authMiddleware, videoRoutes);
+app.use("/api/courses/:courseId/quiz", authMiddleware, quizRoutes);
+app.use("/api/me", authMiddleware, meRoutes);
 
-// Serve Angular frontend build
+// Serve Angular frontend build (DEPOIS das rotas de API)
 app.use(express.static(path.join(__dirname, "../public")));
 
-// Catch-all: serve index.html para Angular Router lidar com rotas diretas
-app.get("*", (req, res) => {
+// Catch-all: serve index.html para Angular Router (por último, SEM middleware de auth)
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
