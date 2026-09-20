@@ -39,6 +39,16 @@ export const UserModel = {
     });
   },
 
+  updateProfile: async (
+    userId: string,
+    data: { nomeCompleto?: string; avatarUrl?: string | null }
+  ) => {
+    return prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  },
+
   upsertByEmail: async (email: string, data: {
     nomeCompleto: string;
     role: string;

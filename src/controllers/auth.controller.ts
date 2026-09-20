@@ -43,6 +43,7 @@ export const AuthController = {
         nomeCompleto: user.nomeCompleto,
         email: user.email,
         role: user.role,
+        avatarUrl: user.avatarUrl,
       },
     });
   },
@@ -98,6 +99,7 @@ export const AuthController = {
           nomeCompleto: user.nomeCompleto,
           email: user.email,
           role: user.role,
+          avatarUrl: user.avatarUrl,
         },
       });
     } catch (error) {

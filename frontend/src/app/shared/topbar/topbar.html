@@ -15,11 +15,17 @@
 
   @if (authService.currentUser(); as user) {
     <div class="topbar-user">
-      <div class="user-avatar">{{ userInitials() }}</div>
-      <div class="user-text">
-        <span class="user-name">{{ user.nomeCompleto }}</span>
-        <span class="user-role">{{ roleLabel() }}</span>
-      </div>
+      <a routerLink="/profile" class="user-profile-link" title="Meu Perfil">
+        @if (user.avatarUrl) {
+          <img class="user-avatar-img" [src]="user.avatarUrl" [alt]="user.nomeCompleto" />
+        } @else {
+          <div class="user-avatar">{{ userInitials() }}</div>
+        }
+        <div class="user-text">
+          <span class="user-name">{{ user.nomeCompleto }}</span>
+          <span class="user-role">{{ roleLabel() }}</span>
+        </div>
+      </a>
       <button type="button" class="logout-button" (click)="logout()" title="Sair" aria-label="Sair">
         <span class="material-icons">logout</span>
       </button>

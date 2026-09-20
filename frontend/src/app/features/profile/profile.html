@@ -1,0 +1,220 @@
+<app-topbar></app-topbar>
+
+<main class="profile-page">
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando perfil...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && !error() && profile(); as profileValue) {
+    <nav class="breadcrumb">
+      <a routerLink="/dashboard">Painel</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">Meu Perfil</span>
+    </nav>
+
+    <div class="page-header">
+      <h1>Meu Perfil</h1>
+      <p class="page-subtitle">Gerencie suas informações pessoais e a segurança da sua conta.</p>
+    </div>
+
+    <div class="profile-columns">
+      <aside class="profile-summary">
+        <div class="avatar-shell">
+          @if (avatarPreview()) {
+            <img class="avatar-img" [src]="avatarPreview()" [alt]="profileValue.nomeCompleto" />
+          } @else {
+            <div class="avatar-fallback">{{ userInitials(profileValue.nomeCompleto) }}</div>
+          }
+          <label class="avatar-upload-button" title="Alterar foto">
+            <span class="material-icons">photo_camera</span>
+            <input type="file" accept="image/*" (change)="onAvatarSelected($event)" hidden />
+          </label>
+        </div>
+        @if (avatarPreview()) {
+          <button type="button" class="text-button" (click)="removeAvatar()">Remover foto</button>
+        }
+        @if (avatarError()) {
+          <span class="field-error">{{ avatarError() }}</span>
+        }
+
+        <h2 class="summary-name">{{ profileValue.nomeCompleto }}</h2>
+        <span class="role-badge">{{ roleLabel(profileValue.role) }}</span>
+        <p class="summary-email">{{ profileValue.email }}</p>
+        <p class="summary-meta">Membro desde {{ profileValue.createdAt | date: 'dd/MM/yyyy' }}</p>
+      </aside>
+
+      <div class="profile-main">
+        <section class="profile-card">
+          <div class="card-header">
+            <div>
+              <h3>Informações Pessoais</h3>
+              <p class="card-subtitle">Nome exibido na plataforma e dados de contato.</p>
+            </div>
+          </div>
+
+          @if (personalError()) {
+            <div class="error-banner">
+              <span class="material-icons">error_outline</span>
+              {{ personalError() }}
+            </div>
+          }
+          @if (personalSuccess()) {
+            <div class="success-banner">
+              <span class="material-icons">check_circle</span>
+              Alterações salvas com sucesso.
+            </div>
+          }
+
+          <form [formGroup]="personalForm" (ngSubmit)="savePersonalInfo()" class="profile-form">
+            <div class="field">
+              <label class="field-label" for="nomeCompleto">Nome completo</label>
+              <div class="input-shell">
+                <span class="material-icons input-icon">person</span>
+                <input id="nomeCompleto" type="text" formControlName="nomeCompleto" placeholder="Seu nome completo" />
+              </div>
+              @if (personalForm.get('nomeCompleto')?.invalid && personalForm.get('nomeCompleto')?.touched) {
+                <span class="field-error">Nome completo é obrigatório (mín. 3 caracteres)</span>
+              }
+            </div>
+
+            <div class="field">
+              <label class="field-label">E-mail</label>
+              <div class="locked-field">
+                <span class="material-icons">mail</span>
+                {{ profileValue.email }}
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="secondary-button" (click)="cancelPersonalInfo()">Cancelar</button>
+              <button type="submit" class="primary-button" [disabled]="personalSubmitting()">
+                @if (personalSubmitting()) {
+                  <span class="spinner spinner-light"></span>
+                  Salvando...
+                } @else {
+                  Salvar Alterações
+                }
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="profile-card">
+          <div class="card-header">
+            <div>
+              <h3>Segurança</h3>
+              <p class="card-subtitle">Altere sua senha de acesso à plataforma.</p>
+            </div>
+          </div>
+
+          @if (passwordError()) {
+            <div class="error-banner">
+              <span class="material-icons">error_outline</span>
+              {{ passwordError() }}
+            </div>
+          }
+          @if (passwordSuccess()) {
+            <div class="success-banner">
+              <span class="material-icons">check_circle</span>
+              Senha atualizada com sucesso.
+            </div>
+          }
+
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="profile-form">
+            <div class="field">
+              <label class="field-label" for="currentPassword">Senha atual</label>
+              <div class="input-shell">
+                <span class="material-icons input-icon">lock</span>
+                <input
+                  id="currentPassword"
+                  [type]="showCurrentPassword() ? 'text' : 'password'"
+                  formControlName="currentPassword"
+                  placeholder="Digite sua senha atual"
+                  (blur)="onCurrentPasswordBlur()"
+                />
+                <button
+                  type="button"
+                  class="icon-toggle"
+                  (click)="toggleCurrentPassword()"
+                  [attr.aria-label]="showCurrentPassword() ? 'Ocultar senha' : 'Mostrar senha'">
+                  <span class="material-icons">{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+              @if (currentPasswordError()) {
+                <span class="field-error">{{ currentPasswordError() }}</span>
+              }
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="newPassword">Nova senha</label>
+              <div class="input-shell">
+                <span class="material-icons input-icon">lock_reset</span>
+                <input
+                  id="newPassword"
+                  [type]="showNewPassword() ? 'text' : 'password'"
+                  formControlName="newPassword"
+                  placeholder="Digite a nova senha"
+                />
+                <button
+                  type="button"
+                  class="icon-toggle"
+                  (click)="toggleNewPassword()"
+                  [attr.aria-label]="showNewPassword() ? 'Ocultar senha' : 'Mostrar senha'">
+                  <span class="material-icons">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+              @if (newPasswordError()) {
+                <span class="field-error">{{ newPasswordError() }}</span>
+              }
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="confirmPassword">Confirmar nova senha</label>
+              <div class="input-shell">
+                <span class="material-icons input-icon">lock_reset</span>
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirmPassword() ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="Repita a nova senha"
+                  (blur)="onConfirmPasswordBlur()"
+                />
+                <button
+                  type="button"
+                  class="icon-toggle"
+                  (click)="toggleConfirmPassword()"
+                  [attr.aria-label]="showConfirmPassword() ? 'Ocultar senha' : 'Mostrar senha'">
+                  <span class="material-icons">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
+                </button>
+              </div>
+              @if (confirmPasswordError()) {
+                <span class="field-error">{{ confirmPasswordError() }}</span>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="primary-button" [disabled]="passwordSubmitting()">
+                @if (passwordSubmitting()) {
+                  <span class="spinner spinner-light"></span>
+                  Atualizando...
+                } @else {
+                  Atualizar Senha
+                }
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  }
+</main>

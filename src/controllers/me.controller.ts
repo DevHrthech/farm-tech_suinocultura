@@ -1,8 +1,62 @@
 import { Response } from "express";
+import bcrypt from "bcrypt";
 import prisma from "../lib/prisma";
 import { AuthRequest } from "../middleware/auth.middleware";
+import { UserModel } from "../models/user.model";
+
+const toProfileDto = (user: any) => ({
+  id: user.id,
+  nomeCompleto: user.nomeCompleto,
+  email: user.email,
+  role: user.role,
+  avatarUrl: user.avatarUrl,
+  createdAt: user.createdAt,
+});
 
 export const MeController = {
+  profile: async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.userId;
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+    res.json(toProfileDto(user));
+  },
+
+  updateProfile: async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.userId;
+    const { nomeCompleto, avatarUrl } = req.body;
+
+    if (nomeCompleto !== undefined && String(nomeCompleto).trim().length < 3) {
+      return res.status(400).json({ error: "Nome completo deve ter pelo menos 3 caracteres" });
+    }
+
+    const updated = await UserModel.updateProfile(userId, { nomeCompleto, avatarUrl });
+    res.json(toProfileDto(updated));
+  },
+
+  changePassword: async (req: AuthRequest, res: Response) => {
+    const userId = req.user!.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Senha atual e nova senha são obrigatórias" });
+    }
+
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ error: "A nova senha deve ter pelo menos 6 caracteres" });
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+
+    const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isValid) {
+      return res.status(403).json({ error: "Senha atual incorreta" });
+    }
+
+    await UserModel.setPassword(userId, newPassword);
+    res.status(204).send();
+  },
+
   dashboard: async (req: AuthRequest, res: Response) => {
     const tenantId = req.tenantId!;
     const userId = req.user!.userId;

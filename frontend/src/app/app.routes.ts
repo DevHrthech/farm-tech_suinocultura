@@ -13,6 +13,7 @@ import { QuizManage } from './features/quiz/quiz-manage/quiz-manage';
 import { QuizQuestionForm } from './features/quiz/quiz-question-form/quiz-question-form';
 import { LoginComponent } from './features/auth/login/login';
 import { RegisterComponent } from './features/auth/register/register';
+import { ProfileComponent } from './features/profile/profile';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: '', component: Dashboard, canActivate: [authGuard] },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'courses', component: CourseList, canActivate: [authGuard] },
   { path: 'courses/new', component: CourseForm, canActivate: [authGuard] },
   { path: 'quizzes', component: QuizCourseList, canActivate: [authGuard] },
