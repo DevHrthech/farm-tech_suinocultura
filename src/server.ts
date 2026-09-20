@@ -9,6 +9,8 @@ import { quizRoutes } from "./routes/quiz.routes";
 import { meRoutes } from "./routes/me.routes";
 import { userRoutes } from "./routes/user.routes";
 import { authRoutes } from "./routes/auth.routes";
+import { instructorRequestRoutes } from "./routes/instructor-request.routes";
+import { notificationRoutes } from "./routes/notification.routes";
 import { authMiddleware } from "./middleware/auth.middleware";
 import { seedUsers } from "./models/user.model";
 import { CourseModel } from "./models/course.model";
@@ -35,6 +37,8 @@ app.use("/api/courses/:courseId/videos", authMiddleware, videoRoutes);
 app.use("/api/courses/:courseId/quiz", authMiddleware, quizRoutes);
 app.use("/api/me", authMiddleware, meRoutes);
 app.use("/api/users", authMiddleware, userRoutes);
+app.use("/api/instructor-requests", authMiddleware, instructorRequestRoutes);
+app.use("/api/notifications", authMiddleware, notificationRoutes);
 
 // Serve Angular frontend build (DEPOIS das rotas de API)
 app.use(express.static(path.join(__dirname, "../public")));

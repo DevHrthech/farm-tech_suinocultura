@@ -27,6 +27,51 @@
       </div>
     </div>
 
+    @if (isAluno()) {
+      @if (instructorRequest() === null) {
+        <div class="instructor-request-banner">
+          <div class="instructor-request-text">
+            <span class="material-icons">school</span>
+            <div>
+              <strong>Quer criar seus próprios cursos e quizzes?</strong>
+              <p>Solicite para se tornar instrutor da plataforma.</p>
+            </div>
+          </div>
+          <button type="button" class="primary-button" [disabled]="requestSubmitting()" (click)="requestToBecomeInstructor()">
+            @if (requestSubmitting()) {
+              <span class="spinner spinner-light"></span>
+              Enviando...
+            } @else {
+              Vire um Instrutor
+            }
+          </button>
+        </div>
+      } @else if (instructorRequest()!.status === 'pending') {
+        <div class="instructor-request-banner instructor-request-banner-pending">
+          <span class="material-icons">hourglass_top</span>
+          <span>Solicitação em análise. Em breve daremos uma resposta.</span>
+        </div>
+      } @else if (instructorRequest()!.status === 'rejected') {
+        <div class="instructor-request-banner instructor-request-banner-rejected">
+          <div class="instructor-request-text">
+            <span class="material-icons">info</span>
+            <div>
+              <strong>Sua solicitação anterior foi recusada.</strong>
+              <p>Você pode solicitar novamente quando quiser.</p>
+            </div>
+          </div>
+          <button type="button" class="primary-button" [disabled]="requestSubmitting()" (click)="requestToBecomeInstructor()">
+            @if (requestSubmitting()) {
+              <span class="spinner spinner-light"></span>
+              Enviando...
+            } @else {
+              Vire um Instrutor
+            }
+          </button>
+        </div>
+      }
+    }
+
     <div class="stats-row">
       <div class="stat-box">
         <span class="material-icons">auto_stories</span>

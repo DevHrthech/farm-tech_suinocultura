@@ -12,61 +12,146 @@
     <p class="page-subtitle">Defina o papel de cada usuário na plataforma: Aluno, Instrutor ou Admin.</p>
   </div>
 
-  @if (loading()) {
-    <div class="state-row">
-      <span class="spinner"></span>
-      Carregando usuários...
-    </div>
-  }
+  <div class="tabs-row">
+    <button type="button" class="tab-button" [class.tab-button-active]="activeTab() === 'users'" (click)="switchTab('users')">
+      Usuários
+    </button>
+    <button type="button" class="tab-button" [class.tab-button-active]="activeTab() === 'requests'" (click)="switchTab('requests')">
+      Solicitações
+      @if (pendingCount() > 0) {
+        <span class="tab-badge">{{ pendingCount() }}</span>
+      }
+    </button>
+  </div>
 
-  @if (error()) {
-    <div class="error-banner">
-      <span class="material-icons">error_outline</span>
-      {{ error() }}
-    </div>
-  }
-
-  @if (!loading() && users().length > 0) {
-    <div class="user-table">
-      <div class="user-table-header">
-        <span class="col-user">Usuário</span>
-        <span class="col-created">Cadastro</span>
-        <span class="col-role">Papel</span>
+  @if (activeTab() === 'users') {
+    @if (loading()) {
+      <div class="state-row">
+        <span class="spinner"></span>
+        Carregando usuários...
       </div>
+    }
 
-      @for (user of users(); track user.id) {
-        <div class="user-row">
-          <div class="col-user">
-            <div class="user-avatar">{{ userInitials(user.nomeCompleto) }}</div>
-            <div class="user-text">
-              <span class="user-name">{{ user.nomeCompleto }}</span>
-              <span class="user-email">{{ user.email }}</span>
+    @if (error()) {
+      <div class="error-banner">
+        <span class="material-icons">error_outline</span>
+        {{ error() }}
+      </div>
+    }
+
+    @if (!loading() && users().length > 0) {
+      <div class="user-table">
+        <div class="user-table-header">
+          <span class="col-user">Usuário</span>
+          <span class="col-created">Cadastro</span>
+          <span class="col-role">Papel</span>
+        </div>
+
+        @for (user of users(); track user.id) {
+          <div class="user-row">
+            <div class="col-user">
+              <div class="user-avatar">{{ userInitials(user.nomeCompleto) }}</div>
+              <div class="user-text">
+                <span class="user-name">{{ user.nomeCompleto }}</span>
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+            </div>
+
+            <div class="col-created">
+              {{ user.createdAt | date: 'dd/MM/yyyy' }}
+            </div>
+
+            <div class="col-role">
+              <select
+                [disabled]="isSelf(user) || savingUserId() === user.id"
+                (change)="onRoleChange(user, $event)">
+                @for (role of roles; track role) {
+                  <option [value]="role" [selected]="role === user.role">{{ roleLabel(role) }}</option>
+                }
+              </select>
+              @if (savingUserId() === user.id) {
+                <span class="spinner spinner-inline"></span>
+              }
+              @if (isSelf(user)) {
+                <span class="self-hint" title="Você não pode alterar seu próprio papel">
+                  <span class="material-icons">info</span>
+                </span>
+              }
             </div>
           </div>
+        }
+      </div>
+    }
+  }
 
-          <div class="col-created">
-            {{ user.createdAt | date: 'dd/MM/yyyy' }}
-          </div>
+  @if (activeTab() === 'requests') {
+    @if (requestsLoading()) {
+      <div class="state-row">
+        <span class="spinner"></span>
+        Carregando solicitações...
+      </div>
+    }
 
-          <div class="col-role">
-            <select
-              [disabled]="isSelf(user) || savingUserId() === user.id"
-              (change)="onRoleChange(user, $event)">
-              @for (role of roles; track role) {
-                <option [value]="role" [selected]="role === user.role">{{ roleLabel(role) }}</option>
-              }
-            </select>
-            @if (savingUserId() === user.id) {
-              <span class="spinner spinner-inline"></span>
-            }
-            @if (isSelf(user)) {
-              <span class="self-hint" title="Você não pode alterar seu próprio papel">
-                <span class="material-icons">info</span>
-              </span>
-            }
-          </div>
+    @if (requestsError()) {
+      <div class="error-banner">
+        <span class="material-icons">error_outline</span>
+        {{ requestsError() }}
+      </div>
+    }
+
+    @if (!requestsLoading() && requests().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">how_to_reg</span>
+        <p>Nenhuma solicitação para se tornar instrutor ainda.</p>
+      </div>
+    }
+
+    @if (!requestsLoading() && requests().length > 0) {
+      <div class="user-table">
+        <div class="user-table-header request-table-header">
+          <span class="col-user">Usuário</span>
+          <span class="col-created">Solicitado</span>
+          <span class="col-status">Status</span>
+          <span class="col-actions">Ações</span>
         </div>
-      }
-    </div>
+
+        @for (request of requests(); track request.id) {
+          <div class="user-row request-row">
+            <div class="col-user">
+              <div class="user-avatar">{{ userInitials(request.user?.nomeCompleto ?? '') }}</div>
+              <div class="user-text">
+                <span class="user-name">{{ request.user?.nomeCompleto }}</span>
+                <span class="user-email">{{ request.user?.email }}</span>
+              </div>
+            </div>
+
+            <div class="col-created">
+              {{ timeAgo(request.createdAt) }}
+            </div>
+
+            <div class="col-status">
+              <span class="status-badge" [class]="'status-badge-' + request.status">
+                {{ statusLabel(request.status) }}
+              </span>
+            </div>
+
+            <div class="col-actions">
+              @if (request.status === 'pending') {
+                @if (reviewingId() === request.id) {
+                  <span class="spinner spinner-inline"></span>
+                } @else {
+                  <button type="button" class="icon-button icon-button-success" title="Aceitar" (click)="approveRequest(request)">
+                    <span class="material-icons">check</span>
+                  </button>
+                  <button type="button" class="icon-button icon-button-danger" title="Recusar" (click)="rejectRequest(request)">
+                    <span class="material-icons">close</span>
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
   }
 </main>

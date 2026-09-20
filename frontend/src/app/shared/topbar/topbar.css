@@ -90,6 +90,122 @@
   gap: 8px;
 }
 
+.notification-bell {
+  position: relative;
+}
+
+.bell-button {
+  border: none;
+  background: #f3f4fc;
+  color: #56635b;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s, color 0.15s;
+}
+
+.bell-button:hover {
+  background: #eef0fb;
+  color: #14261d;
+}
+
+.bell-button .material-icons {
+  font-size: 19px;
+}
+
+.bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #d32f2f;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #e7ebe6;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(20, 38, 29, 0.14);
+  z-index: 20;
+}
+
+.notification-dropdown-header {
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #14261d;
+  border-bottom: 1px solid #f0f2ef;
+}
+
+.notification-empty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #8a9690;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-item {
+  display: block;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f2ef;
+  text-decoration: none;
+  color: inherit;
+  cursor: default;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+a.notification-item {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+a.notification-item:hover {
+  background: #f8faf7;
+}
+
+.notification-item-unread {
+  background: #f3f4fc;
+}
+
+.notification-item p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: #33413a;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #8a9690;
+}
+
 .user-profile-link {
   display: flex;
   align-items: center;

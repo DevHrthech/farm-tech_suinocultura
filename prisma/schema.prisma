@@ -11,13 +11,15 @@ model Projeto {
   idProjeto   String @id @map("id_projeto")
   nomeProjeto String @map("nome_projeto")
 
-  users         User[]
-  courses       Course[]
-  lessons       Lesson[]
-  progress      LessonProgress[]
-  quizzes       Quiz[]
-  quizQuestions QuizQuestion[]
-  quizAttempts  QuizAttempt[]
+  users              User[]
+  courses            Course[]
+  lessons            Lesson[]
+  progress           LessonProgress[]
+  quizzes            Quiz[]
+  quizQuestions      QuizQuestion[]
+  quizAttempts       QuizAttempt[]
+  instructorRequests InstructorRequest[]
+  notifications      Notification[]
 
   @@map("projeto")
 }
@@ -35,10 +37,12 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  projeto      Projeto       @relation(fields: [idProjeto], references: [idProjeto])
-  courses      Course[]      @relation("CourseAuthor")
-  progress     LessonProgress[]
-  quizAttempts QuizAttempt[]
+  projeto           Projeto             @relation(fields: [idProjeto], references: [idProjeto])
+  courses           Course[]            @relation("CourseAuthor")
+  progress          LessonProgress[]
+  quizAttempts      QuizAttempt[]
+  instructorRequest InstructorRequest?
+  notifications     Notification[]
 
   @@map("users")
 }
@@ -159,4 +163,38 @@ model QuizAttempt {
   projeto Projeto @relation(fields: [idProjeto], references: [idProjeto])
 
   @@map("quiz_attempts")
+}
+
+model InstructorRequest {
+  id         String    @id @default(uuid())
+  userId     String    @unique @map("user_id")
+  status     String    @default("pending")
+  reviewedBy String?   @map("reviewed_by")
+  reviewedAt DateTime? @map("reviewed_at")
+  tenantId   String    @default("tenant-1") @map("tenant_id")
+  idProjeto  String    @default("5119fe85-1f7e-44d3-b50c-fbf97e64c33c") @map("id_projeto")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projeto Projeto @relation(fields: [idProjeto], references: [idProjeto])
+
+  @@map("instructor_requests")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  tenantId  String   @default("tenant-1") @map("tenant_id")
+  idProjeto String   @default("5119fe85-1f7e-44d3-b50c-fbf97e64c33c") @map("id_projeto")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projeto Projeto @relation(fields: [idProjeto], references: [idProjeto])
+
+  @@map("notifications")
 }

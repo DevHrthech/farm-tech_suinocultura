@@ -71,9 +71,9 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set('');
 
-    const { email, password } = this.form.value;
+    const { email, password, rememberMe } = this.form.value;
 
-    this.authService.login({ email, password }).subscribe({
+    this.authService.login({ email, password }, rememberMe ?? true).subscribe({
       next: () => {
         this.loading.set(false);
         this.router.navigate(['/dashboard']);

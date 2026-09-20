@@ -18,6 +18,42 @@
 
   @if (authService.currentUser(); as user) {
     <div class="topbar-user">
+      <div class="notification-bell" (click)="$event.stopPropagation()">
+        <button type="button" class="bell-button" (click)="toggleBell($event)" aria-label="Notificações">
+          <span class="material-icons">notifications</span>
+          @if (unreadCount() > 0) {
+            <span class="bell-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+          }
+        </button>
+
+        @if (bellOpen()) {
+          <div class="notification-dropdown">
+            <div class="notification-dropdown-header">Notificações</div>
+            @if (notifications().length === 0) {
+              <div class="notification-empty">Nenhuma notificação ainda.</div>
+            } @else {
+              <div class="notification-list">
+                @for (n of notifications(); track n.id) {
+                  @if (n.link) {
+                    @if (parseLink(n.link); as parsed) {
+                      <a class="notification-item" [class.notification-item-unread]="!n.read" [routerLink]="parsed.path" [queryParams]="parsed.queryParams" (click)="closeBell()">
+                        <p>{{ n.message }}</p>
+                        <span class="notification-time">{{ timeAgo(n.createdAt) }}</span>
+                      </a>
+                    }
+                  } @else {
+                    <div class="notification-item" [class.notification-item-unread]="!n.read">
+                      <p>{{ n.message }}</p>
+                      <span class="notification-time">{{ timeAgo(n.createdAt) }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
       <a routerLink="/profile" class="user-profile-link" title="Meu Perfil">
         @if (user.avatarUrl) {
           <img class="user-avatar-img" [src]="user.avatarUrl" [alt]="user.nomeCompleto" />
