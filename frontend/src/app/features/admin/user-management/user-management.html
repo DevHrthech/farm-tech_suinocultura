@@ -50,11 +50,10 @@
 
           <div class="col-role">
             <select
-              [value]="user.role"
               [disabled]="isSelf(user) || savingUserId() === user.id"
               (change)="onRoleChange(user, $event)">
               @for (role of roles; track role) {
-                <option [value]="role">{{ roleLabel(role) }}</option>
+                <option [value]="role" [selected]="role === user.role">{{ roleLabel(role) }}</option>
               }
             </select>
             @if (savingUserId() === user.id) {
