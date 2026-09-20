@@ -2,27 +2,13 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest } from '../../../core/models/auth.model';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
@@ -34,6 +20,8 @@ export class RegisterComponent {
   emailError = signal('');
   passwordError = signal('');
   confirmPasswordError = signal('');
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -52,8 +40,24 @@ export class RegisterComponent {
 
     this.form.get('nomeCompleto')?.valueChanges.subscribe(() => this.updateNomeCompletoError());
     this.form.get('email')?.valueChanges.subscribe(() => this.updateEmailError());
-    this.form.get('password')?.valueChanges.subscribe(() => this.updatePasswordError());
+    this.form.get('password')?.valueChanges.subscribe(() => {
+      this.updatePasswordError();
+      this.updateConfirmPasswordError();
+    });
     this.form.get('confirmPassword')?.valueChanges.subscribe(() => this.updateConfirmPasswordError());
+  }
+
+  onConfirmPasswordBlur(): void {
+    this.form.get('confirmPassword')?.markAsTouched();
+    this.updateConfirmPasswordError();
+  }
+
+  togglePassword(): void {
+    this.showPassword.set(!this.showPassword());
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword.set(!this.showConfirmPassword());
   }
 
   private passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
