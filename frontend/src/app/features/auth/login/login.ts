@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
+const REMEMBERED_EMAIL_KEY = 'remembered_email';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -24,8 +26,10 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router
   ) {
+    const rememberedEmail = localStorage.getItem(REMEMBERED_EMAIL_KEY) ?? '';
+
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: [rememberedEmail, [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [true],
     });
@@ -75,6 +79,11 @@ export class LoginComponent {
 
     this.authService.login({ email, password }, rememberMe ?? true).subscribe({
       next: () => {
+        if (rememberMe) {
+          localStorage.setItem(REMEMBERED_EMAIL_KEY, email);
+        } else {
+          localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+        }
         this.loading.set(false);
         this.router.navigate(['/dashboard']);
       },

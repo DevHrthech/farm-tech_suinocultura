@@ -33,7 +33,9 @@
             <span class="material-icons input-icon">badge</span>
             <input
               id="email"
+              name="email"
               type="email"
+              autocomplete="username"
               formControlName="email"
               placeholder="ex: veterinario&#64;granja.com.br"
             />
@@ -52,6 +54,8 @@
             <span class="material-icons input-icon">lock</span>
             <input
               id="password"
+              name="password"
+              autocomplete="current-password"
               [type]="showPassword() ? 'text' : 'password'"
               formControlName="password"
               placeholder="Digite seus caracteres seguros"
