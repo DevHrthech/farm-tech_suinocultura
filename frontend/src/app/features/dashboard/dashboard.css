@@ -230,11 +230,19 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .course-progress-cover .material-icons {
   font-size: 22px;
   color: rgba(255, 255, 255, 0.92);
+}
+
+.course-progress-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .course-progress-body {

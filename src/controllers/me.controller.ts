@@ -26,6 +26,7 @@ export const MeController = {
         courseId: course.id,
         courseTitle: course.title,
         category: course.category,
+        coverImageUrl: course.coverImageUrl,
         totalLessons: total,
         completedLessons: completed,
         percent: total > 0 ? Math.round((completed / total) * 100) : 0,

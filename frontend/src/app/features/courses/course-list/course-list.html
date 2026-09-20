@@ -109,8 +109,12 @@
       <div class="course-grid">
         @for (course of filteredCourses(); track course.id) {
           <article class="course-card">
-            <div class="course-cover" [style.background]="categoryColor(course.category)">
-              <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+            <div class="course-cover" [style.background]="course.coverImageUrl ? 'none' : categoryColor(course.category)">
+              @if (course.coverImageUrl) {
+                <img class="course-cover-img" [src]="course.coverImageUrl" [alt]="course.title" />
+              } @else {
+                <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+              }
               @if (lessonCount(course.id) !== null) {
                 <span class="lesson-badge">
                   <span class="material-icons">play_circle</span>

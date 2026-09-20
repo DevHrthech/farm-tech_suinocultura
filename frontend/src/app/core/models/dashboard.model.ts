@@ -2,6 +2,7 @@ export interface CourseProgress {
   courseId: string;
   courseTitle: string;
   category: string;
+  coverImageUrl?: string | null;
   totalLessons: number;
   completedLessons: number;
   percent: number;

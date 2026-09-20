@@ -2,30 +2,24 @@ import { Component, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
 import { CourseService } from '../../../core/services/course.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Topbar } from '../../../shared/topbar/topbar';
+import { categoryIcon as getCategoryIcon } from '../../../core/utils/display.util';
+
+const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
 
 @Component({
   selector: 'app-course-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule
-  ],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, Topbar],
   templateUrl: './course-form.html',
   styleUrl: './course-form.css'
 })
 export class CourseForm {
   private fb = inject(FormBuilder);
   private courseService = inject(CourseService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
@@ -33,6 +27,9 @@ export class CourseForm {
   courseId = signal<string | null>(null);
   isEdit = signal(false);
   loading = signal(false);
+
+  coverImagePreview = signal<string | null>(null);
+  coverImageError = signal('');
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
@@ -51,6 +48,11 @@ export class CourseForm {
         this.courseId.set(id);
         this.isEdit.set(true);
         this.loadCourse(id);
+      } else {
+        const currentUser = this.authService.currentUser();
+        if (currentUser) {
+          this.form.patchValue({ authorId: currentUser.id });
+        }
       }
     });
   }
@@ -65,6 +67,7 @@ export class CourseForm {
           category: course.category,
           authorId: course.authorId
         });
+        this.coverImagePreview.set(course.coverImageUrl ?? null);
         this.loading.set(false);
       },
       error: (err) => {
@@ -73,6 +76,42 @@ export class CourseForm {
         console.error(err);
       }
     });
+  }
+
+  categoryIcon(category: string): string {
+    return getCategoryIcon(category);
+  }
+
+  onCoverSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.coverImageError.set('');
+
+    if (!file.type.startsWith('image/')) {
+      this.coverImageError.set('Selecione um arquivo de imagem válido.');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      this.coverImageError.set('A imagem deve ter no máximo 3MB.');
+      input.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.coverImagePreview.set(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  removeCover(): void {
+    this.coverImagePreview.set(null);
+    this.coverImageError.set('');
   }
 
   onSubmit(): void {
@@ -89,7 +128,8 @@ export class CourseForm {
       title: value.title!,
       description: value.description!,
       category: value.category!,
-      authorId: value.authorId!
+      authorId: value.authorId!,
+      coverImageUrl: this.coverImagePreview()
     };
 
     const request$ = this.isEdit()
@@ -97,8 +137,8 @@ export class CourseForm {
       : this.courseService.create(data);
 
     request$.subscribe({
-      next: () => {
-        this.router.navigate(['/courses']);
+      next: (course) => {
+        this.router.navigate(['/courses', course.id]);
       },
       error: (err) => {
         this.submitError = `Erro ao ${this.isEdit() ? 'atualizar' : 'criar'} curso. Tente novamente.`;

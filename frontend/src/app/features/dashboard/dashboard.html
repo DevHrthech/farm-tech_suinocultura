@@ -91,8 +91,12 @@
         <div class="course-progress-list">
           @for (course of dashboard.coursesProgress; track course.courseId) {
             <div class="course-progress-card">
-              <div class="course-progress-cover" [style.background]="categoryColor(course.category)">
-                <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+              <div class="course-progress-cover" [style.background]="course.coverImageUrl ? 'none' : categoryColor(course.category)">
+                @if (course.coverImageUrl) {
+                  <img class="course-progress-cover-img" [src]="course.coverImageUrl" [alt]="course.courseTitle" />
+                } @else {
+                  <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+                }
               </div>
               <div class="course-progress-body">
                 <h3>{{ course.courseTitle }}</h3>

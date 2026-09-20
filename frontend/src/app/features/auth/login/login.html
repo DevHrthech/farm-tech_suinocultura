@@ -28,14 +28,14 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
         <div class="field">
-          <label class="field-label" for="email">E-mail institucional ou CPF</label>
+          <label class="field-label" for="email">E-mail</label>
           <div class="input-shell">
             <span class="material-icons input-icon">badge</span>
             <input
               id="email"
               type="email"
               formControlName="email"
-              placeholder="ex: veterinario&#64;granja.com.br ou 000.000.000-00"
+              placeholder="ex: veterinario&#64;granja.com.br"
             />
           </div>
           @if (emailError()) {

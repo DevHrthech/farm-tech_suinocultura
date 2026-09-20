@@ -155,11 +155,19 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .course-cover .material-icons {
   font-size: 28px;
   color: rgba(255, 255, 255, 0.92);
+}
+
+.course-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .course-info {

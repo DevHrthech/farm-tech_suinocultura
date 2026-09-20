@@ -32,8 +32,12 @@
 
     <div class="course-card">
       <div class="course-card-top">
-        <div class="course-cover" [style.background]="categoryColor(courseValue.category)">
-          <span class="material-icons">{{ categoryIcon(courseValue.category) }}</span>
+        <div class="course-cover" [style.background]="courseValue.coverImageUrl ? 'none' : categoryColor(courseValue.category)">
+          @if (courseValue.coverImageUrl) {
+            <img class="course-cover-img" [src]="courseValue.coverImageUrl" [alt]="courseValue.title" />
+          } @else {
+            <span class="material-icons">{{ categoryIcon(courseValue.category) }}</span>
+          }
         </div>
 
         <div class="course-info">

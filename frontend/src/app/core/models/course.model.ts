@@ -5,6 +5,7 @@ export interface Course {
   description: string;
   category: string;
   authorId: string;
+  coverImageUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }

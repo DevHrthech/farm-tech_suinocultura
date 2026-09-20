@@ -15,6 +15,7 @@ export const CourseModel = {
     category: string;
     authorId: string;
     tenantId: string;
+    coverImageUrl?: string | null;
   }) => {
     return prisma.course.create({
       data: {
@@ -24,6 +25,7 @@ export const CourseModel = {
         category: data.category,
         authorId: data.authorId,
         tenantId: data.tenantId,
+        coverImageUrl: data.coverImageUrl ?? null,
         idProjeto: PROJETO_ID,
       },
     });
