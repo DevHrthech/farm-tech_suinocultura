@@ -1,0 +1,87 @@
+<div class="form-page">
+  <div class="form-shell">
+    <div class="form-header">
+      <button type="button" class="back-button" (click)="goBack()" aria-label="Voltar">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <div>
+        <h1>{{ isEdit() ? 'Editar Quiz' : 'Criar Novo Quiz' }}</h1>
+        <p class="form-subtitle">
+          {{ isEdit() ? 'Atualize o título e a descrição do quiz.' : 'Crie um quiz e relacione a um curso disponível.' }}
+        </p>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="state-row">
+        <span class="spinner"></span>
+        Carregando quiz...
+      </div>
+    } @else {
+      @if (submitError()) {
+        <div class="error-banner">
+          <span class="material-icons">error_outline</span>
+          {{ submitError() }}
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="quiz-form">
+        <div class="field">
+          <label class="field-label" for="courseId">Curso</label>
+
+          @if (isEdit()) {
+            <div class="locked-course">
+              <span class="material-icons">menu_book</span>
+              {{ lockedCourse()?.title ?? 'Carregando...' }}
+            </div>
+          } @else if (coursesLoading()) {
+            <div class="state-row state-row-inline">
+              <span class="spinner"></span>
+              Carregando cursos...
+            </div>
+          } @else if (courses().length === 0) {
+            <div class="empty-hint">
+              <span class="material-icons">info</span>
+              Nenhum curso cadastrado ainda. Crie um curso primeiro.
+            </div>
+          } @else {
+            <select id="courseId" formControlName="courseId">
+              <option value="" disabled>Selecione o curso...</option>
+              @for (course of courses(); track course.id) {
+                <option [value]="course.id">{{ course.title }}</option>
+              }
+            </select>
+            @if (form.get('courseId')?.touched && form.get('courseId')?.invalid) {
+              <span class="field-error">Selecione o curso ao qual este quiz pertence</span>
+            }
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="title">Título do quiz</label>
+          <input id="title" type="text" formControlName="title" placeholder="Ex: Avaliação Final - Manejo na Maternidade" />
+          @if (form.get('title')?.touched && form.get('title')?.invalid) {
+            <span class="field-error">Digite um título com pelo menos 3 caracteres</span>
+          }
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="description">Descrição <span class="field-hint">(opcional)</span></label>
+          <textarea id="description" formControlName="description" rows="3" placeholder="Explique o objetivo deste quiz..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="secondary-button" (click)="goBack()">Cancelar</button>
+          <button type="submit" class="primary-button" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="spinner spinner-light"></span>
+              Salvando...
+            } @else {
+              {{ isEdit() ? 'Salvar Alterações' : 'Criar Quiz' }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

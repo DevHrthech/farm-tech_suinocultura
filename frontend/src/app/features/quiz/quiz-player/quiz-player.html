@@ -12,7 +12,7 @@
     <div class="error-banner">
       <span class="material-icons">error_outline</span>
       {{ error() }}
-      <a routerLink="/quizzes" class="text-link">Voltar para Quizzes</a>
+      <a [routerLink]="['/courses', courseId(), 'quiz']" class="text-link">Voltar para Quizzes</a>
     </div>
   }
 
@@ -20,7 +20,9 @@
     <nav class="breadcrumb">
       <a routerLink="/quizzes">Quizzes</a>
       <span class="material-icons">chevron_right</span>
-      <span class="breadcrumb-current">{{ courseValue.title }}</span>
+      <a [routerLink]="['/courses', courseId(), 'quiz']">{{ courseValue.title }}</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">{{ quiz()?.title }}</span>
     </nav>
 
     @if (!finished()) {
@@ -112,13 +114,13 @@
           </div>
           <div class="score-text">
             <h2>Quiz concluído!</h2>
-            <p>Você acertou {{ correctCount() }} de {{ totalQuestions() }} perguntas sobre <strong>{{ courseValue.title }}</strong>.</p>
+            <p>Você acertou {{ correctCount() }} de {{ totalQuestions() }} perguntas do quiz <strong>{{ quiz()?.title }}</strong>.</p>
             <div class="score-actions">
               <button type="button" class="secondary-button" (click)="restart()">
                 <span class="material-icons">replay</span>
                 Refazer Quiz
               </button>
-              <a class="primary-link" routerLink="/quizzes">
+              <a class="primary-link" [routerLink]="['/courses', courseId(), 'quiz']">
                 Voltar para Quizzes
                 <span class="material-icons">arrow_forward</span>
               </a>

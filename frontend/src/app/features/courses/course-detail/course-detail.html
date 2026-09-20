@@ -53,6 +53,12 @@
               <span class="material-icons">badge</span>
               Autor: <span class="meta-id">{{ courseValue.authorId }}</span>
             </div>
+            <div class="meta-item">
+              <span class="material-icons">quiz</span>
+              {{ quizSummary().quizCount }} {{ quizSummary().quizCount === 1 ? 'quiz' : 'quizzes' }}
+              &bull;
+              {{ quizSummary().questionCount }} {{ quizSummary().questionCount === 1 ? 'pergunta' : 'perguntas' }}
+            </div>
           </div>
 
           @if (lessons().length > 0) {
@@ -72,7 +78,7 @@
           <span class="material-icons">edit</span>
           Editar Curso
         </button>
-        <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'quiz', 'manage']">
+        <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'quiz']">
           <span class="material-icons">quiz</span>
           Gerenciar Quiz
         </button>

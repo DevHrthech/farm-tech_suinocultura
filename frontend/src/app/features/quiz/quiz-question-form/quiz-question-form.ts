@@ -18,6 +18,7 @@ export class QuizQuestionForm {
   private activatedRoute = inject(ActivatedRoute);
 
   courseId = signal<string | null>(null);
+  quizId = signal<string | null>(null);
   questionId = signal<string | null>(null);
   isEdit = signal(false);
   loading = signal(false);
@@ -44,19 +45,21 @@ export class QuizQuestionForm {
   constructor() {
     effect(() => {
       const courseId = this.activatedRoute.snapshot.paramMap.get('courseId');
+      const quizId = this.activatedRoute.snapshot.paramMap.get('quizId');
       const questionId = this.activatedRoute.snapshot.paramMap.get('questionId');
       if (courseId) this.courseId.set(courseId);
-      if (courseId && questionId) {
+      if (quizId) this.quizId.set(quizId);
+      if (courseId && quizId && questionId) {
         this.questionId.set(questionId);
         this.isEdit.set(true);
-        this.loadQuestion(courseId, questionId);
+        this.loadQuestion(courseId, quizId, questionId);
       }
     });
   }
 
-  private loadQuestion(courseId: string, id: string): void {
+  private loadQuestion(courseId: string, quizId: string, id: string): void {
     this.loading.set(true);
-    this.quizService.listQuestions(courseId).subscribe({
+    this.quizService.listQuestions(courseId, quizId).subscribe({
       next: (questions) => {
         const question = questions.find((item) => item.id === id);
         if (question) {
@@ -109,7 +112,8 @@ export class QuizQuestionForm {
     }
 
     const courseId = this.courseId();
-    if (!courseId) return;
+    const quizId = this.quizId();
+    if (!courseId || !quizId) return;
 
     this.submitting.set(true);
     this.submitError.set('');
@@ -124,12 +128,12 @@ export class QuizQuestionForm {
     };
 
     const request$ = this.isEdit()
-      ? this.quizService.updateQuestion(courseId, this.questionId()!, data)
-      : this.quizService.createQuestion(courseId, data);
+      ? this.quizService.updateQuestion(courseId, quizId, this.questionId()!, data)
+      : this.quizService.createQuestion(courseId, quizId, data);
 
     request$.subscribe({
       next: () => {
-        this.router.navigate(['/courses', courseId, 'quiz', 'manage']);
+        this.router.navigate(['/courses', courseId, 'quiz', quizId, 'questions']);
       },
       error: (err) => {
         this.submitError.set(`Erro ao ${this.isEdit() ? 'atualizar' : 'criar'} pergunta. Tente novamente.`);
@@ -140,6 +144,6 @@ export class QuizQuestionForm {
   }
 
   goBack(): void {
-    this.router.navigate(['/courses', this.courseId(), 'quiz', 'manage']);
+    this.router.navigate(['/courses', this.courseId(), 'quiz', this.quizId(), 'questions']);
   }
 }

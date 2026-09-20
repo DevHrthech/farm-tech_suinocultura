@@ -5,12 +5,25 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { CourseService } from '../../../core/services/course.service';
 import { LessonService } from '../../../core/services/lesson.service';
+import { QuizService } from '../../../core/services/quiz.service';
 import { Course } from '../../../core/models/course.model';
+import { Lesson } from '../../../core/models/lesson.model';
+import { QuizSummary } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
 import {
   categoryIcon as getCategoryIcon,
   categoryColor as getCategoryColor,
 } from '../../../core/utils/display.util';
+
+export type CourseStatus = 'in_progress' | 'not_started' | 'completed' | 'empty';
+
+export interface CourseProgress {
+  total: number;
+  completed: number;
+  percent: number;
+  nextLesson: Lesson | null;
+  status: CourseStatus;
+}
 
 @Component({
   selector: 'app-course-list',
@@ -23,10 +36,12 @@ export class CourseList implements OnInit {
   courses = signal<Course[]>([]);
   loading = signal(true);
   error = signal('');
-  lessonCounts = signal<Record<string, number>>({});
+  lessonsByCourse = signal<Record<string, Lesson[]>>({});
+  quizSummaries = signal<Record<string, QuizSummary>>({});
 
   searchTerm = signal('');
   selectedCategory = signal<string | null>(null);
+  selectedStatus = signal<'all' | CourseStatus>('all');
 
   categories = computed(() => {
     const seen = new Set<string>();
@@ -41,26 +56,66 @@ export class CourseList implements OnInit {
     return list;
   });
 
+  progressByCourse = computed(() => {
+    const lessonsMap = this.lessonsByCourse();
+    const result: Record<string, CourseProgress> = {};
+    for (const course of this.courses()) {
+      const lessons = [...(lessonsMap[course.id] ?? [])].sort((a, b) => a.order - b.order);
+      const total = lessons.length;
+      const completed = lessons.filter((lesson) => lesson.completed).length;
+      const nextLesson = lessons.find((lesson) => !lesson.completed) ?? null;
+
+      let status: CourseStatus;
+      if (total === 0) status = 'empty';
+      else if (completed === total) status = 'completed';
+      else if (completed > 0) status = 'in_progress';
+      else status = 'not_started';
+
+      result[course.id] = {
+        total,
+        completed,
+        percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+        nextLesson,
+        status
+      };
+    }
+    return result;
+  });
+
+  statusCounts = computed(() => {
+    const progress = Object.values(this.progressByCourse());
+    return {
+      all: this.courses().length,
+      in_progress: progress.filter((p) => p.status === 'in_progress').length,
+      not_started: progress.filter((p) => p.status === 'not_started').length,
+      completed: progress.filter((p) => p.status === 'completed').length
+    };
+  });
+
   filteredCourses = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     const category = this.selectedCategory();
+    const status = this.selectedStatus();
+    const progress = this.progressByCourse();
     return this.courses().filter((course) => {
       const matchesCategory = !category || course.category === category;
       const matchesTerm =
         !term ||
         course.title.toLowerCase().includes(term) ||
         course.description.toLowerCase().includes(term);
-      return matchesCategory && matchesTerm;
+      const matchesStatus = status === 'all' || progress[course.id]?.status === status;
+      return matchesCategory && matchesTerm && matchesStatus;
     });
   });
 
   totalLessons = computed(() =>
-    Object.values(this.lessonCounts()).reduce((sum, count) => sum + count, 0)
+    Object.values(this.progressByCourse()).reduce((sum, p) => sum + p.total, 0)
   );
 
   constructor(
     private courseService: CourseService,
-    private lessonService: LessonService
+    private lessonService: LessonService,
+    private quizService: QuizService
   ) {}
 
   ngOnInit(): void {
@@ -68,7 +123,8 @@ export class CourseList implements OnInit {
       next: (data) => {
         this.courses.set(data);
         this.loading.set(false);
-        this.loadLessonCounts(data);
+        this.loadLessonsByCourse(data);
+        this.loadQuizSummaries(data);
       },
       error: (err) => {
         this.error.set('Erro ao carregar cursos. Verifique se o backend está rodando.');
@@ -78,24 +134,50 @@ export class CourseList implements OnInit {
     });
   }
 
-  private loadLessonCounts(courses: Course[]): void {
+  private loadLessonsByCourse(courses: Course[]): void {
     if (courses.length === 0) return;
 
     forkJoin(
       courses.map((course) =>
         this.lessonService.listByCourse(course.id).pipe(
-          map((lessons) => [course.id, lessons.length] as const),
-          catchError(() => of([course.id, 0] as const))
+          map((lessons) => [course.id, lessons] as const),
+          catchError(() => of([course.id, []] as const))
         )
       )
     ).subscribe((entries) => {
-      this.lessonCounts.set(Object.fromEntries(entries));
+      this.lessonsByCourse.set(Object.fromEntries(entries));
     });
   }
 
-  lessonCount(courseId: string): number | null {
-    const counts = this.lessonCounts();
-    return courseId in counts ? counts[courseId] : null;
+  private loadQuizSummaries(courses: Course[]): void {
+    if (courses.length === 0) return;
+
+    forkJoin(
+      courses.map((course) =>
+        this.quizService.getSummary(course.id).pipe(
+          map((summary) => [course.id, summary] as const),
+          catchError(() => of([course.id, { quizCount: 0, questionCount: 0 }] as const))
+        )
+      )
+    ).subscribe((entries) => {
+      this.quizSummaries.set(Object.fromEntries(entries));
+    });
+  }
+
+  quizSummary(courseId: string): QuizSummary {
+    return this.quizSummaries()[courseId] ?? { quizCount: 0, questionCount: 0 };
+  }
+
+  progress(courseId: string): CourseProgress {
+    return (
+      this.progressByCourse()[courseId] ?? {
+        total: 0,
+        completed: 0,
+        percent: 0,
+        nextLesson: null,
+        status: 'empty'
+      }
+    );
   }
 
   categoryIcon(category: string): string {
@@ -114,8 +196,13 @@ export class CourseList implements OnInit {
     this.selectedCategory.set(category);
   }
 
+  selectStatus(status: 'all' | CourseStatus): void {
+    this.selectedStatus.set(status);
+  }
+
   clearFilters(): void {
     this.searchTerm.set('');
     this.selectedCategory.set(null);
+    this.selectedStatus.set('all');
   }
 }

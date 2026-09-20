@@ -1,10 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CourseService } from '../../../core/services/course.service';
 import { QuizService } from '../../../core/services/quiz.service';
-import { Course } from '../../../core/models/course.model';
-import { QuizQuestion } from '../../../core/models/quiz.model';
+import { Quiz, QuizQuestion } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
 
 @Component({
@@ -16,7 +14,8 @@ import { Topbar } from '../../../shared/topbar/topbar';
 })
 export class QuizManage implements OnInit {
   courseId = signal<string | null>(null);
-  course = signal<Course | null>(null);
+  quizId = signal<string | null>(null);
+  quiz = signal<Quiz | null>(null);
   questions = signal<QuizQuestion[]>([]);
   loading = signal(true);
   error = signal('');
@@ -24,28 +23,29 @@ export class QuizManage implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private courseService: CourseService,
     private quizService: QuizService
   ) {}
 
   ngOnInit(): void {
     const courseId = this.activatedRoute.snapshot.paramMap.get('courseId');
-    if (!courseId) return;
+    const quizId = this.activatedRoute.snapshot.paramMap.get('quizId');
+    if (!courseId || !quizId) return;
     this.courseId.set(courseId);
+    this.quizId.set(quizId);
 
-    this.courseService.getById(courseId).subscribe({
-      next: (course) => this.course.set(course),
+    this.quizService.getQuiz(courseId, quizId).subscribe({
+      next: (quiz) => this.quiz.set(quiz),
       error: (err) => {
-        this.error.set('Erro ao carregar curso.');
+        this.error.set('Erro ao carregar quiz.');
         console.error(err);
       },
     });
 
-    this.loadQuestions(courseId);
+    this.loadQuestions(courseId, quizId);
   }
 
-  loadQuestions(courseId: string): void {
-    this.quizService.listQuestions(courseId).subscribe({
+  loadQuestions(courseId: string, quizId: string): void {
+    this.quizService.listQuestions(courseId, quizId).subscribe({
       next: (questions) => {
         this.questions.set([...questions].sort((a, b) => a.order - b.order));
         this.loading.set(false);
@@ -60,11 +60,12 @@ export class QuizManage implements OnInit {
 
   deleteQuestion(id: string): void {
     const courseId = this.courseId();
-    if (!courseId) return;
+    const quizId = this.quizId();
+    if (!courseId || !quizId) return;
     if (!confirm('Tem certeza que deseja remover esta pergunta?')) return;
 
-    this.quizService.deleteQuestion(courseId, id).subscribe({
-      next: () => this.loadQuestions(courseId),
+    this.quizService.deleteQuestion(courseId, quizId, id).subscribe({
+      next: () => this.loadQuestions(courseId, quizId),
       error: (err) => {
         this.error.set('Erro ao remover pergunta.');
         console.error(err);
@@ -73,6 +74,6 @@ export class QuizManage implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/quizzes']);
+    this.router.navigate(['/courses', this.courseId(), 'quiz']);
   }
 }

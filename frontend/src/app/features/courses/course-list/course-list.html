@@ -48,6 +48,37 @@
       </button>
     </div>
 
+    <div class="status-tabs">
+      <button
+        type="button"
+        class="status-tab"
+        [class.status-tab-active]="selectedStatus() === 'all'"
+        (click)="selectStatus('all')">
+        Todos ({{ statusCounts().all }})
+      </button>
+      <button
+        type="button"
+        class="status-tab"
+        [class.status-tab-active]="selectedStatus() === 'in_progress'"
+        (click)="selectStatus('in_progress')">
+        Em Andamento ({{ statusCounts().in_progress }})
+      </button>
+      <button
+        type="button"
+        class="status-tab"
+        [class.status-tab-active]="selectedStatus() === 'not_started'"
+        (click)="selectStatus('not_started')">
+        Não Iniciados ({{ statusCounts().not_started }})
+      </button>
+      <button
+        type="button"
+        class="status-tab"
+        [class.status-tab-active]="selectedStatus() === 'completed'"
+        (click)="selectStatus('completed')">
+        Concluídos ({{ statusCounts().completed }})
+      </button>
+    </div>
+
     @if (categories().length > 1) {
       <div class="chips-row">
         <button
@@ -55,7 +86,7 @@
           class="chip"
           [class.chip-active]="selectedCategory() === null"
           (click)="selectCategory(null)">
-          Todos
+          Todas as categorias
         </button>
         @for (category of categories(); track category) {
           <button
@@ -115,23 +146,82 @@
               } @else {
                 <span class="material-icons">{{ categoryIcon(course.category) }}</span>
               }
-              @if (lessonCount(course.id) !== null) {
-                <span class="lesson-badge">
-                  <span class="material-icons">play_circle</span>
-                  {{ lessonCount(course.id) }} {{ lessonCount(course.id) === 1 ? 'aula' : 'aulas' }}
+              <span class="category-badge">
+                <span class="material-icons">{{ categoryIcon(course.category) }}</span>
+                {{ course.category }}
+              </span>
+              @if (progress(course.id).status === 'completed') {
+                <span class="completed-badge">
+                  <span class="material-icons">verified</span>
+                  Concluído
                 </span>
               }
+              <span class="lesson-badge">
+                <span class="material-icons">play_circle</span>
+                {{ progress(course.id).total }} {{ progress(course.id).total === 1 ? 'aula' : 'aulas' }}
+              </span>
             </div>
+
             <div class="course-body">
-              <span class="category-pill">{{ course.category }}</span>
-              <h2 class="course-title">{{ course.title }}</h2>
-              <p class="course-description">{{ course.description }}</p>
-            </div>
-            <div class="course-footer">
-              <a class="details-link" [routerLink]="['/courses', course.id]">
-                Ver Detalhes
-                <span class="material-icons">arrow_forward</span>
+              <a [routerLink]="['/courses', course.id]" class="course-title-link">
+                <h2 class="course-title">{{ course.title }}</h2>
               </a>
+              <p class="course-description">{{ course.description }}</p>
+
+              @if (quizSummary(course.id).quizCount > 0) {
+                <div class="quiz-summary-row">
+                  <span class="material-icons">quiz</span>
+                  {{ quizSummary(course.id).quizCount }} {{ quizSummary(course.id).quizCount === 1 ? 'quiz' : 'quizzes' }}
+                  &bull;
+                  {{ quizSummary(course.id).questionCount }} {{ quizSummary(course.id).questionCount === 1 ? 'pergunta' : 'perguntas' }}
+                </div>
+              }
+
+              @if (progress(course.id).status === 'in_progress' && progress(course.id).nextLesson) {
+                <div class="next-lesson-row">
+                  <span class="material-icons">play_arrow</span>
+                  <span>Próxima: {{ progress(course.id).nextLesson!.title }}</span>
+                </div>
+              }
+
+              @if (progress(course.id).total > 0) {
+                <div class="progress-row">
+                  <span>{{ progress(course.id).completed }} de {{ progress(course.id).total }} aulas concluídas</span>
+                  <span class="progress-percent">{{ progress(course.id).percent }}%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" [style.width.%]="progress(course.id).percent"></div>
+                </div>
+              }
+            </div>
+
+            <div class="course-footer">
+              @switch (progress(course.id).status) {
+                @case ('in_progress') {
+                  <a class="cta-button" [routerLink]="['/courses', course.id, 'lessons', progress(course.id).nextLesson!.id]">
+                    Continuar Aula
+                    <span class="material-icons">arrow_forward</span>
+                  </a>
+                }
+                @case ('not_started') {
+                  <a class="cta-button" [routerLink]="['/courses', course.id, 'lessons', progress(course.id).nextLesson!.id]">
+                    Começar Curso
+                    <span class="material-icons">arrow_forward</span>
+                  </a>
+                }
+                @case ('completed') {
+                  <a class="cta-button cta-button-outline" [routerLink]="['/courses', course.id]">
+                    Revisar Curso
+                    <span class="material-icons">arrow_forward</span>
+                  </a>
+                }
+                @default {
+                  <a class="cta-button cta-button-outline" [routerLink]="['/courses', course.id]">
+                    Ver Detalhes
+                    <span class="material-icons">arrow_forward</span>
+                  </a>
+                }
+              }
             </div>
           </article>
         }

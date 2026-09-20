@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
 import { QuizService } from '../../../core/services/quiz.service';
 import { Course } from '../../../core/models/course.model';
-import { QuizQuestion } from '../../../core/models/quiz.model';
+import { Quiz, QuizQuestion } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
 
 interface Answer {
@@ -21,7 +21,9 @@ interface Answer {
 })
 export class QuizPlayer implements OnInit {
   courseId = signal<string | null>(null);
+  quizId = signal<string | null>(null);
   course = signal<Course | null>(null);
+  quiz = signal<Quiz | null>(null);
   questions = signal<QuizQuestion[]>([]);
   loading = signal(true);
   error = signal('');
@@ -65,8 +67,10 @@ export class QuizPlayer implements OnInit {
 
   ngOnInit(): void {
     const courseId = this.activatedRoute.snapshot.paramMap.get('courseId');
-    if (!courseId) return;
+    const quizId = this.activatedRoute.snapshot.paramMap.get('quizId');
+    if (!courseId || !quizId) return;
     this.courseId.set(courseId);
+    this.quizId.set(quizId);
 
     this.courseService.getById(courseId).subscribe({
       next: (course) => this.course.set(course),
@@ -76,12 +80,17 @@ export class QuizPlayer implements OnInit {
       },
     });
 
-    this.quizService.listQuestions(courseId).subscribe({
+    this.quizService.getQuiz(courseId, quizId).subscribe({
+      next: (quiz) => this.quiz.set(quiz),
+      error: (err) => console.error(err),
+    });
+
+    this.quizService.listQuestions(courseId, quizId).subscribe({
       next: (questions) => {
         this.questions.set([...questions].sort((a, b) => a.order - b.order));
         this.loading.set(false);
         if (questions.length === 0) {
-          this.error.set('Este curso ainda não possui perguntas cadastradas no quiz.');
+          this.error.set('Este quiz ainda não possui perguntas cadastradas.');
         }
       },
       error: (err) => {
@@ -133,12 +142,13 @@ export class QuizPlayer implements OnInit {
 
   private finishQuiz(): void {
     const courseId = this.courseId();
-    if (!courseId) return;
+    const quizId = this.quizId();
+    if (!courseId || !quizId) return;
 
     this.submitting.set(true);
     this.saveError.set('');
 
-    this.quizService.submitAttempt(courseId, this.correctCount(), this.totalQuestions()).subscribe({
+    this.quizService.submitAttempt(courseId, quizId, this.correctCount(), this.totalQuestions()).subscribe({
       next: () => {
         this.submitting.set(false);
         this.finished.set(true);

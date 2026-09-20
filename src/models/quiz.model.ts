@@ -3,9 +3,41 @@ import prisma from "../lib/prisma";
 const PROJETO_ID = "5119fe85-1f7e-44d3-b50c-fbf97e64c33c";
 
 export const QuizModel = {
-  findQuestionsByCourseId: (courseId: string, tenantId: string) =>
-    prisma.quizQuestion.findMany({
+  findQuizzesByCourseId: (courseId: string, tenantId: string) =>
+    prisma.quiz.findMany({
       where: { courseId, tenantId },
+      include: { _count: { select: { questions: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+
+  findQuizById: (id: string, tenantId: string) =>
+    prisma.quiz.findFirst({
+      where: { id, tenantId },
+      include: { _count: { select: { questions: true } } },
+    }),
+
+  createQuiz: (data: { courseId: string; tenantId: string; title: string; description?: string | null }) =>
+    prisma.quiz.create({
+      data: {
+        courseId: data.courseId,
+        tenantId: data.tenantId,
+        title: data.title,
+        description: data.description ?? null,
+        idProjeto: PROJETO_ID,
+      },
+    }),
+
+  updateQuiz: (id: string, tenantId: string, data: { title?: string; description?: string | null }) =>
+    prisma.quiz
+      .updateMany({ where: { id, tenantId }, data })
+      .then((result) => (result.count === 0 ? null : prisma.quiz.findFirst({ where: { id, tenantId } }))),
+
+  deleteQuiz: (id: string, tenantId: string) =>
+    prisma.quiz.deleteMany({ where: { id, tenantId } }).then((r) => r.count > 0),
+
+  findQuestionsByQuizId: (quizId: string, tenantId: string) =>
+    prisma.quizQuestion.findMany({
+      where: { quizId, tenantId },
       orderBy: { questionOrder: "asc" },
     }),
 
@@ -14,6 +46,7 @@ export const QuizModel = {
 
   createQuestion: (data: {
     courseId: string;
+    quizId: string;
     tenantId: string;
     text: string;
     options: string[];
@@ -24,6 +57,7 @@ export const QuizModel = {
     prisma.quizQuestion.create({
       data: {
         courseId: data.courseId,
+        quizId: data.quizId,
         tenantId: data.tenantId,
         text: data.text,
         options: data.options,
@@ -56,6 +90,7 @@ export const QuizModel = {
   createAttempt: (data: {
     userId: string;
     courseId: string;
+    quizId?: string | null;
     tenantId: string;
     score: number;
     total: number;
@@ -64,6 +99,7 @@ export const QuizModel = {
       data: {
         userId: data.userId,
         courseId: data.courseId,
+        quizId: data.quizId ?? null,
         tenantId: data.tenantId,
         score: data.score,
         total: data.total,
@@ -74,6 +110,12 @@ export const QuizModel = {
   findLastAttempt: (userId: string, courseId: string) =>
     prisma.quizAttempt.findFirst({
       where: { userId, courseId },
+      orderBy: { completedAt: "desc" },
+    }),
+
+  findLastAttemptForQuiz: (userId: string, quizId: string) =>
+    prisma.quizAttempt.findFirst({
+      where: { userId, quizId },
       orderBy: { completedAt: "desc" },
     }),
 };

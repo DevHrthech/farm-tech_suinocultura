@@ -15,11 +15,13 @@
     </div>
   }
 
-  @if (!loading() && course(); as courseValue) {
+  @if (!loading() && quiz(); as quizValue) {
     <nav class="breadcrumb">
-      <a routerLink="/quizzes">Quizzes</a>
+      <a routerLink="/courses">Cursos</a>
       <span class="material-icons">chevron_right</span>
-      <span class="breadcrumb-current">{{ courseValue.title }}</span>
+      <a [routerLink]="['/courses', courseId(), 'quiz']">Quizzes</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">{{ quizValue.title }}</span>
     </nav>
 
     <div class="header-row">
@@ -27,10 +29,10 @@
         <span class="material-icons">arrow_back</span>
       </button>
       <div>
-        <h1>Gerenciar Perguntas</h1>
-        <p class="header-subtitle">{{ courseValue.title }}</p>
+        <h1>{{ quizValue.title }}</h1>
+        <p class="header-subtitle">{{ questions().length }} {{ questions().length === 1 ? 'pergunta' : 'perguntas' }} cadastradas</p>
       </div>
-      <button type="button" class="primary-button" [routerLink]="['/courses', courseValue.id, 'quiz', 'questions', 'new']">
+      <button type="button" class="primary-button" [routerLink]="['/courses', courseId(), 'quiz', quizId(), 'questions', 'new']">
         <span class="material-icons">add</span>
         Adicionar Pergunta
       </button>
@@ -49,7 +51,7 @@
               <span class="question-number">{{ i + 1 }}</span>
               <p class="question-text">{{ question.text }}</p>
               <div class="question-actions">
-                <button type="button" class="icon-button" [routerLink]="['/courses', courseValue.id, 'quiz', 'questions', question.id, 'edit']" title="Editar">
+                <button type="button" class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quizId(), 'questions', question.id, 'edit']" title="Editar">
                   <span class="material-icons">edit</span>
                 </button>
                 <button type="button" class="icon-button icon-button-danger" (click)="deleteQuestion(question.id)" title="Remover">

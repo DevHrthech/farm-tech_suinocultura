@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
 import { LessonService } from '../../../core/services/lesson.service';
+import { QuizService } from '../../../core/services/quiz.service';
 import { Course } from '../../../core/models/course.model';
 import { Lesson } from '../../../core/models/lesson.model';
+import { QuizSummary } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
 import {
   categoryIcon as getCategoryIcon,
@@ -23,10 +25,12 @@ export class CourseDetail {
   private router = inject(Router);
   private courseService = inject(CourseService);
   private lessonService = inject(LessonService);
+  private quizService = inject(QuizService);
 
   courseId = signal<string | null>(null);
   course = signal<Course | null>(null);
   lessons = signal<Lesson[]>([]);
+  quizSummary = signal<QuizSummary>({ quizCount: 0, questionCount: 0 });
   loading = signal(true);
   error = signal('');
 
@@ -45,7 +49,15 @@ export class CourseDetail {
         this.courseId.set(id);
         this.loadCourse(id);
         this.loadLessons(id);
+        this.loadQuizSummary(id);
       }
+    });
+  }
+
+  loadQuizSummary(courseId: string): void {
+    this.quizService.getSummary(courseId).subscribe({
+      next: (summary) => this.quizSummary.set(summary),
+      error: (err) => console.error(err),
     });
   }
 

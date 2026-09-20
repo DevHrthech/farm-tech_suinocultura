@@ -1,0 +1,109 @@
+<app-topbar></app-topbar>
+
+<main class="quiz-list-page">
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando quizzes...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading()) {
+    <nav class="breadcrumb">
+      <a routerLink="/courses">Cursos</a>
+      <span class="material-icons">chevron_right</span>
+      <a [routerLink]="['/courses', courseId()]">{{ course()?.title }}</a>
+      <span class="material-icons">chevron_right</span>
+      <span class="breadcrumb-current">Quizzes</span>
+    </nav>
+
+    <div class="page-header">
+      <div class="page-header-text">
+        <button type="button" class="back-button" (click)="goBack()" aria-label="Voltar">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <div>
+          <h1>Quizzes de {{ course()?.title }}</h1>
+          <p class="page-subtitle">
+            {{ quizzes().length }} {{ quizzes().length === 1 ? 'quiz' : 'quizzes' }} &bull;
+            {{ totalQuestions() }} {{ totalQuestions() === 1 ? 'pergunta' : 'perguntas' }}
+          </p>
+        </div>
+      </div>
+      <a class="primary-button" [routerLink]="['/quiz-builder/new']" [queryParams]="{ courseId: courseId() }">
+        <span class="material-icons">add</span>
+        Criar Quiz
+      </a>
+    </div>
+
+    @if (quizzes().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">quiz</span>
+        <p>Nenhum quiz cadastrado para este curso ainda.</p>
+        <a class="primary-button" [routerLink]="['/quiz-builder/new']" [queryParams]="{ courseId: courseId() }">
+          <span class="material-icons">add</span>
+          Criar Quiz
+        </a>
+      </div>
+    } @else {
+      <div class="quiz-grid">
+        @for (quiz of quizzes(); track quiz.id) {
+          <article class="quiz-card">
+            <div class="quiz-card-header">
+              <span class="quiz-icon material-icons">quiz</span>
+              <div class="quiz-card-title-group">
+                <h2 class="quiz-title">{{ quiz.title }}</h2>
+                @if (quiz.description) {
+                  <p class="quiz-description">{{ quiz.description }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="quiz-meta-row">
+              <span class="meta-chip">
+                <span class="material-icons">help_outline</span>
+                {{ quiz.questionCount }} {{ quiz.questionCount === 1 ? 'pergunta' : 'perguntas' }}
+              </span>
+              @if (lastScorePercent(quiz.id) !== null) {
+                <span class="meta-chip meta-chip-score">
+                  <span class="material-icons">military_tech</span>
+                  Última nota: {{ lastScorePercent(quiz.id) }}%
+                </span>
+              }
+            </div>
+
+            <div class="quiz-actions">
+              @if (quiz.questionCount > 0) {
+                <a class="cta-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'play']">
+                  <span class="material-icons">play_arrow</span>
+                  Fazer Quiz
+                </a>
+              } @else {
+                <span class="cta-button cta-button-disabled">
+                  <span class="material-icons">play_arrow</span>
+                  Sem perguntas
+                </span>
+              }
+              <a class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'questions']" title="Gerenciar perguntas">
+                <span class="material-icons">list_alt</span>
+              </a>
+              <a class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'edit']" title="Editar quiz">
+                <span class="material-icons">edit</span>
+              </a>
+              <button type="button" class="icon-button icon-button-danger" (click)="deleteQuiz(quiz.id)" title="Excluir quiz">
+                <span class="material-icons">delete</span>
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+</main>

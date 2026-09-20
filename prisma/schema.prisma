@@ -15,6 +15,7 @@ model Projeto {
   courses       Course[]
   lessons       Lesson[]
   progress      LessonProgress[]
+  quizzes       Quiz[]
   quizQuestions QuizQuestion[]
   quizAttempts  QuizAttempt[]
 
@@ -56,6 +57,7 @@ model Course {
   author        User           @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   projeto       Projeto        @relation(fields: [idProjeto], references: [idProjeto])
   lessons       Lesson[]
+  quizzes       Quiz[]
   quizQuestions QuizQuestion[]
   quizAttempts  QuizAttempt[]
 
@@ -100,9 +102,28 @@ model LessonProgress {
   @@map("lesson_progress")
 }
 
+model Quiz {
+  id          String   @id @default(uuid())
+  courseId    String   @map("course_id")
+  title       String
+  description String?
+  tenantId    String   @default("tenant-1") @map("tenant_id")
+  idProjeto   String   @default("5119fe85-1f7e-44d3-b50c-fbf97e64c33c") @map("id_projeto")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  projeto   Projeto        @relation(fields: [idProjeto], references: [idProjeto])
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@map("quizzes")
+}
+
 model QuizQuestion {
   id            String   @id @default(uuid())
   courseId      String   @map("course_id")
+  quizId        String   @map("quiz_id")
   text          String
   options       Json
   correctIndex  Int      @map("correct_index")
@@ -114,6 +135,7 @@ model QuizQuestion {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz    Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
   projeto Projeto @relation(fields: [idProjeto], references: [idProjeto])
 
   @@map("quiz_questions")
@@ -123,6 +145,7 @@ model QuizAttempt {
   id          String   @id @default(uuid())
   userId      String   @map("user_id")
   courseId    String   @map("course_id")
+  quizId      String?  @map("quiz_id")
   score       Int
   total       Int
   tenantId    String   @default("tenant-1") @map("tenant_id")
@@ -131,6 +154,7 @@ model QuizAttempt {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quiz    Quiz?   @relation(fields: [quizId], references: [id], onDelete: SetNull)
   projeto Projeto @relation(fields: [idProjeto], references: [idProjeto])
 
   @@map("quiz_attempts")

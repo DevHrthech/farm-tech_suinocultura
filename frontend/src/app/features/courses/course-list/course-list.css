@@ -159,6 +159,39 @@
   font-size: 18px;
 }
 
+/* ---------- Status tabs ---------- */
+
+.status-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.status-tab {
+  border: 1px solid #e2e5f2;
+  background: #ffffff;
+  color: #4b5875;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.status-tab:hover {
+  border-color: #1e7a4c;
+  color: #1e7a4c;
+}
+
+.status-tab-active {
+  background: #eafbf1;
+  border-color: #1e7a4c;
+  color: #1e7a4c;
+}
+
 /* ---------- Category chips ---------- */
 
 .chips-row {
@@ -299,7 +332,7 @@
 
 .course-cover {
   position: relative;
-  height: 140px;
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,24 +372,58 @@
   color: #ffffff;
 }
 
+.category-badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(20, 38, 29, 0.55);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: capitalize;
+  padding: 4px 10px;
+  border-radius: 999px;
+  backdrop-filter: blur(2px);
+}
+
+.category-badge .material-icons {
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.completed-badge {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #1c5c3d;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.completed-badge .material-icons {
+  font-size: 13px;
+  color: #ffffff;
+}
+
 .course-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   padding: 18px 18px 8px;
 }
 
-.category-pill {
-  align-self: flex-start;
-  background: #eef0fb;
-  color: #4b5875;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 999px;
+.course-title-link {
+  text-decoration: none;
 }
 
 .course-title {
@@ -365,6 +432,11 @@
   font-weight: 700;
   color: #14261d;
   line-height: 1.35;
+  transition: color 0.15s;
+}
+
+.course-title-link:hover .course-title {
+  color: #1e7a4c;
 }
 
 .course-description {
@@ -373,32 +445,116 @@
   color: #6b7a72;
   line-height: 1.55;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.quiz-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #8a9690;
+}
+
+.quiz-summary-row .material-icons {
+  font-size: 14px;
+  color: #9aa2b8;
+}
+
+.next-lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eafbf1;
+  color: #1e7a4c;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+  border-radius: 8px;
+}
+
+.next-lesson-row span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.next-lesson-row .material-icons {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6b7a72;
+}
+
+.progress-percent {
+  color: #1e7a4c;
+  font-weight: 700;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #e7e9f5;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #1c5c3d;
+  transition: width 0.2s;
 }
 
 .course-footer {
   padding: 12px 18px 18px;
 }
 
-.details-link {
-  display: inline-flex;
+.cta-button {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  color: #1e7a4c;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #1c5c3d;
+  color: #ffffff;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
+  padding: 11px 16px;
   text-decoration: none;
+  transition: background 0.15s;
 }
 
-.details-link .material-icons {
-  font-size: 16px;
+.cta-button:hover {
+  background: #164a31;
+}
+
+.cta-button .material-icons {
+  font-size: 17px;
   transition: transform 0.15s;
 }
 
-.details-link:hover .material-icons {
+.cta-button:hover .material-icons {
   transform: translateX(3px);
+}
+
+.cta-button-outline {
+  background: #ffffff;
+  color: #33413a;
+  border: 1px solid #d7ded9;
+}
+
+.cta-button-outline:hover {
+  background: #f0f2ef;
 }
 
 /* ---------- Footer ---------- */
