@@ -42,10 +42,12 @@
           (input)="onSearch($event)"
         />
       </div>
-      <button type="button" class="primary-button" routerLink="/courses/new">
-        <span class="material-icons">add</span>
-        Novo Curso
-      </button>
+      @if (canAuthor()) {
+        <button type="button" class="primary-button" routerLink="/courses/new">
+          <span class="material-icons">add</span>
+          Novo Curso
+        </button>
+      }
     </div>
 
     <div class="status-tabs">
@@ -125,10 +127,12 @@
       <div class="empty-state">
         <span class="material-icons">menu_book</span>
         <p>Nenhum curso cadastrado ainda.</p>
-        <button type="button" class="primary-button" routerLink="/courses/new">
-          <span class="material-icons">add</span>
-          Novo Curso
-        </button>
+        @if (canAuthor()) {
+          <button type="button" class="primary-button" routerLink="/courses/new">
+            <span class="material-icons">add</span>
+            Novo Curso
+          </button>
+        }
       </div>
     } @else if (filteredCourses().length === 0) {
       <div class="empty-state">

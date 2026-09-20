@@ -29,10 +29,12 @@
             </div>
           </div>
         </div>
-        <a class="primary-button" routerLink="/quiz-builder/new">
-          <span class="material-icons">add</span>
-          Criar Quiz
-        </a>
+        @if (canAuthor()) {
+          <a class="primary-button" routerLink="/quiz-builder/new">
+            <span class="material-icons">add</span>
+            Criar Quiz
+          </a>
+        }
       </div>
     }
   </div>

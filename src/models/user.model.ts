@@ -49,6 +49,20 @@ export const UserModel = {
     });
   },
 
+  updateRole: async (userId: string, role: string) => {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+  },
+
+  list: async (tenantId: string) => {
+    return prisma.user.findMany({
+      where: { tenantId },
+      orderBy: { nomeCompleto: "asc" },
+    });
+  },
+
   upsertByEmail: async (email: string, data: {
     nomeCompleto: string;
     role: string;

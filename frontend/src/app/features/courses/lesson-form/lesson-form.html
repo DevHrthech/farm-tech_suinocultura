@@ -8,6 +8,8 @@
 
   @if (loading()) {
     <p class="loading">Carregando...</p>
+  } @else if (permissionDenied()) {
+    <p class="error">Você não tem permissão para gerenciar aulas deste curso, pois não foi você quem o criou.</p>
   } @else {
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <mat-form-field appearance="outline" class="full-width">

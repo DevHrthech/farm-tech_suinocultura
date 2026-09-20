@@ -11,6 +11,9 @@
     <a routerLink="/dashboard" routerLinkActive="nav-link-active" class="nav-link">Painel</a>
     <a routerLink="/courses" routerLinkActive="nav-link-active" class="nav-link">Cursos</a>
     <a routerLink="/quizzes" routerLinkActive="nav-link-active" class="nav-link">Quizzes</a>
+    @if (authService.currentUser()?.role === 'admin') {
+      <a routerLink="/admin/users" routerLinkActive="nav-link-active" class="nav-link">Usuários</a>
+    }
   </nav>
 
   @if (authService.currentUser(); as user) {

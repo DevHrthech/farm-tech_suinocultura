@@ -74,13 +74,15 @@
       </div>
 
       <div class="course-actions">
-        <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'edit']">
-          <span class="material-icons">edit</span>
-          Editar Curso
-        </button>
+        @if (canManage()) {
+          <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'edit']">
+            <span class="material-icons">edit</span>
+            Editar Curso
+          </button>
+        }
         <button type="button" class="secondary-button" [routerLink]="['/courses', courseValue.id, 'quiz']">
           <span class="material-icons">quiz</span>
-          Gerenciar Quiz
+          {{ canManage() ? 'Gerenciar Quiz' : 'Ver Quiz' }}
         </button>
       </div>
     </div>
@@ -88,10 +90,12 @@
     <div class="lessons-section">
       <div class="lessons-header">
         <h2>Aulas ({{ lessons().length }})</h2>
-        <button type="button" class="primary-button" [routerLink]="['/courses', courseValue.id, 'lessons', 'new']">
-          <span class="material-icons">add</span>
-          Adicionar Aula
-        </button>
+        @if (canManage()) {
+          <button type="button" class="primary-button" [routerLink]="['/courses', courseValue.id, 'lessons', 'new']">
+            <span class="material-icons">add</span>
+            Adicionar Aula
+          </button>
+        }
       </div>
 
       @if (lessons().length === 0) {
@@ -125,14 +129,16 @@
                 <p>{{ lesson.description }}</p>
               </div>
 
-              <div class="lesson-actions">
-                <button type="button" class="icon-button" [routerLink]="['/courses', courseValue.id, 'lessons', lesson.id, 'edit']" title="Editar">
-                  <span class="material-icons">edit</span>
-                </button>
-                <button type="button" class="icon-button icon-button-danger" (click)="deleteLesson(lesson.id)" title="Deletar">
-                  <span class="material-icons">delete</span>
-                </button>
-              </div>
+              @if (canManage()) {
+                <div class="lesson-actions">
+                  <button type="button" class="icon-button" [routerLink]="['/courses', courseValue.id, 'lessons', lesson.id, 'edit']" title="Editar">
+                    <span class="material-icons">edit</span>
+                  </button>
+                  <button type="button" class="icon-button icon-button-danger" (click)="deleteLesson(lesson.id)" title="Deletar">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              }
             </div>
           }
         </div>

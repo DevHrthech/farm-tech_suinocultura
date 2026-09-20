@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { Topbar } from '../../../shared/topbar/topbar';
 import { categoryIcon as getCategoryIcon } from '../../../core/utils/display.util';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 const MAX_IMAGE_SIZE_BYTES = 3 * 1024 * 1024;
 
@@ -31,6 +32,7 @@ export class CourseForm {
   loading = signal(false);
 
   authorName = signal<string | null>(null);
+  permissionDenied = signal(false);
 
   coverImagePreview = signal<string | null>(null);
   coverImageError = signal('');
@@ -66,6 +68,12 @@ export class CourseForm {
     this.loading.set(true);
     this.courseService.getById(id).subscribe({
       next: (course) => {
+        if (!canManageCourse(this.authService.currentUser(), course.authorId)) {
+          this.permissionDenied.set(true);
+          this.loading.set(false);
+          return;
+        }
+
         this.form.patchValue({
           title: course.title,
           description: course.description,

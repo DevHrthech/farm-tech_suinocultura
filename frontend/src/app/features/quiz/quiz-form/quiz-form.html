@@ -17,6 +17,11 @@
         <span class="spinner"></span>
         Carregando quiz...
       </div>
+    } @else if (permissionDenied()) {
+      <div class="error-banner">
+        <span class="material-icons">block</span>
+        Você não tem permissão para editar este quiz, pois não foi você quem criou o curso.
+      </div>
     } @else {
       @if (submitError()) {
         <div class="error-banner">

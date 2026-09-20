@@ -14,6 +14,7 @@ import {
   categoryIcon as getCategoryIcon,
   categoryColor as getCategoryColor,
 } from '../../../core/utils/display.util';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-course-detail',
@@ -133,5 +134,11 @@ export class CourseDetail {
 
   goBack(): void {
     this.router.navigate(['/courses']);
+  }
+
+  canManage(): boolean {
+    const course = this.course();
+    if (!course) return false;
+    return canManageCourse(this.authService.currentUser(), course.authorId);
   }
 }

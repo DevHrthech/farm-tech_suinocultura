@@ -1,0 +1,73 @@
+<app-topbar></app-topbar>
+
+<main class="user-management-page">
+  <nav class="breadcrumb">
+    <a routerLink="/dashboard">Painel</a>
+    <span class="material-icons">chevron_right</span>
+    <span class="breadcrumb-current">Usuários</span>
+  </nav>
+
+  <div class="page-header">
+    <h1>Gerenciar Usuários</h1>
+    <p class="page-subtitle">Defina o papel de cada usuário na plataforma: Aluno, Instrutor ou Admin.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-row">
+      <span class="spinner"></span>
+      Carregando usuários...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-icons">error_outline</span>
+      {{ error() }}
+    </div>
+  }
+
+  @if (!loading() && users().length > 0) {
+    <div class="user-table">
+      <div class="user-table-header">
+        <span class="col-user">Usuário</span>
+        <span class="col-created">Cadastro</span>
+        <span class="col-role">Papel</span>
+      </div>
+
+      @for (user of users(); track user.id) {
+        <div class="user-row">
+          <div class="col-user">
+            <div class="user-avatar">{{ userInitials(user.nomeCompleto) }}</div>
+            <div class="user-text">
+              <span class="user-name">{{ user.nomeCompleto }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+          </div>
+
+          <div class="col-created">
+            {{ user.createdAt | date: 'dd/MM/yyyy' }}
+          </div>
+
+          <div class="col-role">
+            <select
+              [value]="user.role"
+              [disabled]="isSelf(user) || savingUserId() === user.id"
+              (change)="onRoleChange(user, $event)">
+              @for (role of roles; track role) {
+                <option [value]="role">{{ roleLabel(role) }}</option>
+              }
+            </select>
+            @if (savingUserId() === user.id) {
+              <span class="spinner spinner-inline"></span>
+            }
+            @if (isSelf(user)) {
+              <span class="self-hint" title="Você não pode alterar seu próprio papel">
+                <span class="material-icons">info</span>
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</main>

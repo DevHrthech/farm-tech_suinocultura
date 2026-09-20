@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { QuizService } from '../../../core/services/quiz.service';
+import { CourseService } from '../../../core/services/course.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-quiz-question-form',
@@ -14,6 +17,8 @@ import { QuizService } from '../../../core/services/quiz.service';
 export class QuizQuestionForm {
   private fb = inject(FormBuilder);
   private quizService = inject(QuizService);
+  private courseService = inject(CourseService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
@@ -24,6 +29,7 @@ export class QuizQuestionForm {
   loading = signal(false);
   submitting = signal(false);
   submitError = signal('');
+  permissionDenied = signal(false);
 
   form = this.fb.group({
     text: ['', [Validators.required, Validators.minLength(10)]],
@@ -47,13 +53,27 @@ export class QuizQuestionForm {
       const courseId = this.activatedRoute.snapshot.paramMap.get('courseId');
       const quizId = this.activatedRoute.snapshot.paramMap.get('quizId');
       const questionId = this.activatedRoute.snapshot.paramMap.get('questionId');
-      if (courseId) this.courseId.set(courseId);
+      if (courseId) {
+        this.courseId.set(courseId);
+        this.checkCourseOwnership(courseId);
+      }
       if (quizId) this.quizId.set(quizId);
       if (courseId && quizId && questionId) {
         this.questionId.set(questionId);
         this.isEdit.set(true);
         this.loadQuestion(courseId, quizId, questionId);
       }
+    });
+  }
+
+  private checkCourseOwnership(courseId: string): void {
+    this.courseService.getById(courseId).subscribe({
+      next: (course) => {
+        if (!canManageCourse(this.authService.currentUser(), course.authorId)) {
+          this.permissionDenied.set(true);
+        }
+      },
+      error: (err) => console.error(err),
     });
   }
 

@@ -14,7 +14,12 @@ import { QuizQuestionForm } from './features/quiz/quiz-question-form/quiz-questi
 import { LoginComponent } from './features/auth/login/login';
 import { RegisterComponent } from './features/auth/register/register';
 import { ProfileComponent } from './features/profile/profile';
+import { UserManagement } from './features/admin/user-management/user-management';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+
+const instructorGuard = roleGuard(['instrutor', 'admin']);
+const adminGuard = roleGuard(['admin']);
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -22,20 +27,21 @@ export const routes: Routes = [
   { path: '', component: Dashboard, canActivate: [authGuard] },
   { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'admin/users', component: UserManagement, canActivate: [authGuard, adminGuard] },
   { path: 'courses', component: CourseList, canActivate: [authGuard] },
-  { path: 'courses/new', component: CourseForm, canActivate: [authGuard] },
+  { path: 'courses/new', component: CourseForm, canActivate: [authGuard, instructorGuard] },
   { path: 'quizzes', component: QuizCourseList, canActivate: [authGuard] },
-  { path: 'quiz-builder/new', component: QuizForm, canActivate: [authGuard] },
+  { path: 'quiz-builder/new', component: QuizForm, canActivate: [authGuard, instructorGuard] },
   { path: 'courses/:id', component: CourseDetail, canActivate: [authGuard] },
-  { path: 'courses/:id/edit', component: CourseForm, canActivate: [authGuard] },
-  { path: 'courses/:courseId/lessons/new', component: LessonForm, canActivate: [authGuard] },
-  { path: 'courses/:courseId/lessons/:lessonId/edit', component: LessonForm, canActivate: [authGuard] },
+  { path: 'courses/:id/edit', component: CourseForm, canActivate: [authGuard, instructorGuard] },
+  { path: 'courses/:courseId/lessons/new', component: LessonForm, canActivate: [authGuard, instructorGuard] },
+  { path: 'courses/:courseId/lessons/:lessonId/edit', component: LessonForm, canActivate: [authGuard, instructorGuard] },
   { path: 'courses/:courseId/lessons/:lessonId', component: LessonPlayer, canActivate: [authGuard] },
   { path: 'courses/:courseId/quiz', component: QuizList, canActivate: [authGuard] },
-  { path: 'courses/:courseId/quiz/:quizId/edit', component: QuizForm, canActivate: [authGuard] },
+  { path: 'courses/:courseId/quiz/:quizId/edit', component: QuizForm, canActivate: [authGuard, instructorGuard] },
   { path: 'courses/:courseId/quiz/:quizId/play', component: QuizPlayer, canActivate: [authGuard] },
-  { path: 'courses/:courseId/quiz/:quizId/questions', component: QuizManage, canActivate: [authGuard] },
-  { path: 'courses/:courseId/quiz/:quizId/questions/new', component: QuizQuestionForm, canActivate: [authGuard] },
-  { path: 'courses/:courseId/quiz/:quizId/questions/:questionId/edit', component: QuizQuestionForm, canActivate: [authGuard] },
+  { path: 'courses/:courseId/quiz/:quizId/questions', component: QuizManage, canActivate: [authGuard, instructorGuard] },
+  { path: 'courses/:courseId/quiz/:quizId/questions/new', component: QuizQuestionForm, canActivate: [authGuard, instructorGuard] },
+  { path: 'courses/:courseId/quiz/:quizId/questions/:questionId/edit', component: QuizQuestionForm, canActivate: [authGuard, instructorGuard] },
   { path: '**', redirectTo: 'login' }
 ];

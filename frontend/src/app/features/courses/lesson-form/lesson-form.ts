@@ -9,6 +9,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { LessonService } from '../../../core/services/lesson.service';
+import { CourseService } from '../../../core/services/course.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-lesson-form',
@@ -30,6 +33,8 @@ import { LessonService } from '../../../core/services/lesson.service';
 export class LessonForm {
   private fb = inject(FormBuilder);
   private lessonService = inject(LessonService);
+  private courseService = inject(CourseService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
@@ -38,6 +43,7 @@ export class LessonForm {
   isEdit = signal(false);
   loading = signal(false);
   videoPreview = signal<string>('');
+  permissionDenied = signal(false);
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
@@ -55,12 +61,24 @@ export class LessonForm {
       const lid = this.activatedRoute.snapshot.paramMap.get('lessonId');
       if (cid) {
         this.courseId.set(cid);
+        this.checkCourseOwnership(cid);
       }
       if (lid) {
         this.lessonId.set(lid);
         this.isEdit.set(true);
         this.loadLesson(cid!, lid);
       }
+    });
+  }
+
+  private checkCourseOwnership(courseId: string): void {
+    this.courseService.getById(courseId).subscribe({
+      next: (course) => {
+        if (!canManageCourse(this.authService.currentUser(), course.authorId)) {
+          this.permissionDenied.set(true);
+        }
+      },
+      error: (err) => console.error(err),
     });
   }
 

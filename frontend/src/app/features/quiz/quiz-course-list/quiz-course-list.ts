@@ -5,6 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { CourseService } from '../../../core/services/course.service';
 import { QuizService } from '../../../core/services/quiz.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Course } from '../../../core/models/course.model';
 import { QuizSummary } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
@@ -12,6 +13,7 @@ import {
   categoryIcon as getCategoryIcon,
   categoryColor as getCategoryColor,
 } from '../../../core/utils/display.util';
+import { canAuthor } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-quiz-course-list',
@@ -36,8 +38,13 @@ export class QuizCourseList implements OnInit {
 
   constructor(
     private courseService: CourseService,
-    private quizService: QuizService
+    private quizService: QuizService,
+    private authService: AuthService
   ) {}
+
+  canAuthor(): boolean {
+    return canAuthor(this.authService.currentUser());
+  }
 
   ngOnInit(): void {
     this.courseService.list().subscribe({

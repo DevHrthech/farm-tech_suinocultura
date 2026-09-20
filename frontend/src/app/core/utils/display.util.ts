@@ -23,6 +23,7 @@ export function categoryColor(category: string | null | undefined): string {
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
+  instrutor: 'Instrutor',
   aluno: 'Aluno',
 };
 

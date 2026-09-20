@@ -5,9 +5,11 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { CourseService } from '../../../core/services/course.service';
 import { QuizService } from '../../../core/services/quiz.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Course } from '../../../core/models/course.model';
 import { Quiz, QuizAttempt } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-quiz-list',
@@ -32,8 +34,15 @@ export class QuizList implements OnInit {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private courseService: CourseService,
-    private quizService: QuizService
+    private quizService: QuizService,
+    private authService: AuthService
   ) {}
+
+  canManage(): boolean {
+    const course = this.course();
+    if (!course) return false;
+    return canManageCourse(this.authService.currentUser(), course.authorId);
+  }
 
   ngOnInit(): void {
     const courseId = this.activatedRoute.snapshot.paramMap.get('courseId');

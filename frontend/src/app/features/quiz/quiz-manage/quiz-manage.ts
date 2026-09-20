@@ -2,8 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { QuizService } from '../../../core/services/quiz.service';
+import { CourseService } from '../../../core/services/course.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Quiz, QuizQuestion } from '../../../core/models/quiz.model';
 import { Topbar } from '../../../shared/topbar/topbar';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-quiz-manage',
@@ -19,11 +22,14 @@ export class QuizManage implements OnInit {
   questions = signal<QuizQuestion[]>([]);
   loading = signal(true);
   error = signal('');
+  permissionDenied = signal(false);
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private router: Router,
-    private quizService: QuizService
+    private quizService: QuizService,
+    private courseService: CourseService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -39,6 +45,15 @@ export class QuizManage implements OnInit {
         this.error.set('Erro ao carregar quiz.');
         console.error(err);
       },
+    });
+
+    this.courseService.getById(courseId).subscribe({
+      next: (course) => {
+        if (!canManageCourse(this.authService.currentUser(), course.authorId)) {
+          this.permissionDenied.set(true);
+        }
+      },
+      error: (err) => console.error(err),
     });
 
     this.loadQuestions(courseId, quizId);

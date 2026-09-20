@@ -37,20 +37,24 @@
           </p>
         </div>
       </div>
-      <a class="primary-button" [routerLink]="['/quiz-builder/new']" [queryParams]="{ courseId: courseId() }">
-        <span class="material-icons">add</span>
-        Criar Quiz
-      </a>
+      @if (canManage()) {
+        <a class="primary-button" [routerLink]="['/quiz-builder/new']" [queryParams]="{ courseId: courseId() }">
+          <span class="material-icons">add</span>
+          Criar Quiz
+        </a>
+      }
     </div>
 
     @if (quizzes().length === 0) {
       <div class="empty-state">
         <span class="material-icons">quiz</span>
         <p>Nenhum quiz cadastrado para este curso ainda.</p>
-        <a class="primary-button" [routerLink]="['/quiz-builder/new']" [queryParams]="{ courseId: courseId() }">
-          <span class="material-icons">add</span>
-          Criar Quiz
-        </a>
+        @if (canManage()) {
+          <a class="primary-button" [routerLink]="['/quiz-builder/new']" [queryParams]="{ courseId: courseId() }">
+            <span class="material-icons">add</span>
+            Criar Quiz
+          </a>
+        }
       </div>
     } @else {
       <div class="quiz-grid">
@@ -91,15 +95,17 @@
                   Sem perguntas
                 </span>
               }
-              <a class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'questions']" title="Gerenciar perguntas">
-                <span class="material-icons">list_alt</span>
-              </a>
-              <a class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'edit']" title="Editar quiz">
-                <span class="material-icons">edit</span>
-              </a>
-              <button type="button" class="icon-button icon-button-danger" (click)="deleteQuiz(quiz.id)" title="Excluir quiz">
-                <span class="material-icons">delete</span>
-              </button>
+              @if (canManage()) {
+                <a class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'questions']" title="Gerenciar perguntas">
+                  <span class="material-icons">list_alt</span>
+                </a>
+                <a class="icon-button" [routerLink]="['/courses', courseId(), 'quiz', quiz.id, 'edit']" title="Editar quiz">
+                  <span class="material-icons">edit</span>
+                </a>
+                <button type="button" class="icon-button icon-button-danger" (click)="deleteQuiz(quiz.id)" title="Excluir quiz">
+                  <span class="material-icons">delete</span>
+                </button>
+              }
             </div>
           </article>
         }

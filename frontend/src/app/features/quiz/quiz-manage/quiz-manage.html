@@ -15,7 +15,14 @@
     </div>
   }
 
-  @if (!loading() && quiz(); as quizValue) {
+  @if (!loading() && permissionDenied()) {
+    <div class="error-banner">
+      <span class="material-icons">block</span>
+      Você não tem permissão para gerenciar as perguntas deste quiz, pois não foi você quem criou o curso.
+    </div>
+  }
+
+  @if (!loading() && !permissionDenied() && quiz(); as quizValue) {
     <nav class="breadcrumb">
       <a routerLink="/courses">Cursos</a>
       <span class="material-icons">chevron_right</span>

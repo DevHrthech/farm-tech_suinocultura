@@ -4,7 +4,9 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
 import { QuizService } from '../../../core/services/quiz.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Course } from '../../../core/models/course.model';
+import { canManageCourse } from '../../../core/utils/permissions.util';
 
 @Component({
   selector: 'app-quiz-form',
@@ -17,6 +19,7 @@ export class QuizForm {
   private fb = inject(FormBuilder);
   private courseService = inject(CourseService);
   private quizService = inject(QuizService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
@@ -29,6 +32,7 @@ export class QuizForm {
   loading = signal(false);
   submitting = signal(false);
   submitError = signal('');
+  permissionDenied = signal(false);
 
   form = this.fb.group({
     courseId: ['', Validators.required],
@@ -47,7 +51,12 @@ export class QuizForm {
         this.quizId.set(quizId);
         this.form.patchValue({ courseId });
         this.form.get('courseId')?.disable();
-        this.loadCourse(courseId, (course) => this.lockedCourse.set(course));
+        this.loadCourse(courseId, (course) => {
+          this.lockedCourse.set(course);
+          if (!canManageCourse(this.authService.currentUser(), course.authorId)) {
+            this.permissionDenied.set(true);
+          }
+        });
         this.loadQuiz(courseId, quizId);
       } else {
         this.loadCourses(queryCourseId ?? courseId ?? undefined);
@@ -59,9 +68,11 @@ export class QuizForm {
     this.coursesLoading.set(true);
     this.courseService.list().subscribe({
       next: (courses) => {
-        this.courses.set(courses);
+        const currentUser = this.authService.currentUser();
+        const manageable = courses.filter((course) => canManageCourse(currentUser, course.authorId));
+        this.courses.set(manageable);
         this.coursesLoading.set(false);
-        if (preselectCourseId) {
+        if (preselectCourseId && manageable.some((course) => course.id === preselectCourseId)) {
           this.form.patchValue({ courseId: preselectCourseId });
         }
       },

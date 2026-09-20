@@ -20,13 +20,13 @@ export const CourseController = {
 
   create: async (req: AuthRequest, res: Response) => {
     const tenantId = req.tenantId!;
-    const { title, description, category, authorId, coverImageUrl } = req.body;
+    const { title, description, category, coverImageUrl } = req.body;
     const course = await CourseModel.create({
       tenantId,
       title,
       description,
       category,
-      authorId,
+      authorId: req.user!.userId,
       coverImageUrl,
     });
     res.status(201).json(course);
