@@ -7,6 +7,7 @@ import { lessonRoutes } from "./routes/lesson.routes";
 import { videoRoutes } from "./routes/video.routes";
 import { quizRoutes } from "./routes/quiz.routes";
 import { meRoutes } from "./routes/me.routes";
+import { userRoutes } from "./routes/user.routes";
 import { authRoutes } from "./routes/auth.routes";
 import { authMiddleware } from "./middleware/auth.middleware";
 import { seedUsers } from "./models/user.model";
@@ -33,6 +34,7 @@ app.use("/api/courses/:courseId/lessons", authMiddleware, lessonRoutes);
 app.use("/api/courses/:courseId/videos", authMiddleware, videoRoutes);
 app.use("/api/courses/:courseId/quiz", authMiddleware, quizRoutes);
 app.use("/api/me", authMiddleware, meRoutes);
+app.use("/api/users", authMiddleware, userRoutes);
 
 // Serve Angular frontend build (DEPOIS das rotas de API)
 app.use(express.static(path.join(__dirname, "../public")));

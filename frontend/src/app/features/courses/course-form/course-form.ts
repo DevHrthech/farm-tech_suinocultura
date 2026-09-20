@@ -4,6 +4,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CourseService } from '../../../core/services/course.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
 import { Topbar } from '../../../shared/topbar/topbar';
 import { categoryIcon as getCategoryIcon } from '../../../core/utils/display.util';
 
@@ -20,6 +21,7 @@ export class CourseForm {
   private fb = inject(FormBuilder);
   private courseService = inject(CourseService);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
   private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
@@ -27,6 +29,8 @@ export class CourseForm {
   courseId = signal<string | null>(null);
   isEdit = signal(false);
   loading = signal(false);
+
+  authorName = signal<string | null>(null);
 
   coverImagePreview = signal<string | null>(null);
   coverImageError = signal('');
@@ -52,6 +56,7 @@ export class CourseForm {
         const currentUser = this.authService.currentUser();
         if (currentUser) {
           this.form.patchValue({ authorId: currentUser.id });
+          this.authorName.set(currentUser.nomeCompleto);
         }
       }
     });
@@ -69,10 +74,27 @@ export class CourseForm {
         });
         this.coverImagePreview.set(course.coverImageUrl ?? null);
         this.loading.set(false);
+        this.loadAuthorName(course.authorId);
       },
       error: (err) => {
         this.submitError = 'Erro ao carregar curso.';
         this.loading.set(false);
+        console.error(err);
+      }
+    });
+  }
+
+  private loadAuthorName(authorId: string): void {
+    const currentUser = this.authService.currentUser();
+    if (currentUser && currentUser.id === authorId) {
+      this.authorName.set(currentUser.nomeCompleto);
+      return;
+    }
+
+    this.userService.getById(authorId).subscribe({
+      next: (user) => this.authorName.set(user.nomeCompleto),
+      error: (err) => {
+        this.authorName.set('Autor não encontrado');
         console.error(err);
       }
     });

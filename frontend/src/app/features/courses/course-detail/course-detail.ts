@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CourseService } from '../../../core/services/course.service';
 import { LessonService } from '../../../core/services/lesson.service';
 import { QuizService } from '../../../core/services/quiz.service';
+import { UserService } from '../../../core/services/user.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Course } from '../../../core/models/course.model';
 import { Lesson } from '../../../core/models/lesson.model';
 import { QuizSummary } from '../../../core/models/quiz.model';
@@ -26,11 +28,14 @@ export class CourseDetail {
   private courseService = inject(CourseService);
   private lessonService = inject(LessonService);
   private quizService = inject(QuizService);
+  private userService = inject(UserService);
+  private authService = inject(AuthService);
 
   courseId = signal<string | null>(null);
   course = signal<Course | null>(null);
   lessons = signal<Lesson[]>([]);
   quizSummary = signal<QuizSummary>({ quizCount: 0, questionCount: 0 });
+  authorName = signal<string | null>(null);
   loading = signal(true);
   error = signal('');
 
@@ -65,11 +70,28 @@ export class CourseDetail {
     this.courseService.getById(id).subscribe({
       next: (course) => {
         this.course.set(course);
+        this.loadAuthorName(course.authorId);
       },
       error: (err) => {
         this.error.set('Erro ao carregar curso.');
         console.error(err);
       }
+    });
+  }
+
+  private loadAuthorName(authorId: string): void {
+    const currentUser = this.authService.currentUser();
+    if (currentUser && currentUser.id === authorId) {
+      this.authorName.set(currentUser.nomeCompleto);
+      return;
+    }
+
+    this.userService.getById(authorId).subscribe({
+      next: (user) => this.authorName.set(user.nomeCompleto),
+      error: (err) => {
+        this.authorName.set('Autor não encontrado');
+        console.error(err);
+      },
     });
   }
 

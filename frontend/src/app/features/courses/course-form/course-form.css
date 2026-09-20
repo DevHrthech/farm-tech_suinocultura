@@ -176,6 +176,24 @@
   padding: 12px 14px;
 }
 
+.locked-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e5f2;
+  border-radius: 12px;
+  padding: 13px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #33413a;
+  background: #f0f2ef;
+}
+
+.locked-field .material-icons {
+  font-size: 20px;
+  color: #6b7a72;
+}
+
 .input-icon {
   color: #8a92b2;
   font-size: 20px;

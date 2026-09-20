@@ -96,14 +96,11 @@
       </div>
 
       <div class="field">
-        <label class="field-label" for="authorId">Autor (ID)</label>
-        <div class="input-shell">
-          <span class="material-icons input-icon">badge</span>
-          <input id="authorId" type="text" formControlName="authorId" placeholder="Ex: user-1" />
+        <label class="field-label">Autor</label>
+        <div class="locked-field">
+          <span class="material-icons">badge</span>
+          {{ authorName() ?? 'Carregando...' }}
         </div>
-        @if (form.get('authorId')?.invalid && form.get('authorId')?.touched) {
-          <span class="field-error">Autor é obrigatório</span>
-        }
       </div>
 
       @if (submitError) {
